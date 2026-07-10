@@ -1,0 +1,126 @@
+﻿@model List<HBYS.Web.Models.Tahlil>
+
+@{
+    ViewData["Title"] = "Tahlil Raporu";
+}
+
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3>Tahlil Raporu</h3>
+            <p class="text-muted mb-0">Tarih aralığına göre tahlil kayıtlarını görüntüle.</p>
+        </div>
+
+        <a asp-controller="Rapor" asp-action="Index" class="btn btn-secondary">
+            Raporlara Dön
+        </a>
+    </div>
+
+    <form asp-controller="Rapor" asp-action="TahlilRaporu" method="get" class="row g-2 mb-4">
+        <div class="col-md-4">
+            <input type="date" name="baslangicTarihi" value="@ViewBag.BaslangicTarihi" class="form-control" />
+        </div>
+
+        <div class="col-md-4">
+            <input type="date" name="bitisTarihi" value="@ViewBag.BitisTarihi" class="form-control" />
+        </div>
+
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-main w-100">Getir</button>
+        </div>
+    </form>
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-3">
+            <div class="alert alert-primary">
+                <strong>Toplam:</strong> @ViewBag.Toplam
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="alert alert-warning">
+                <strong>İstenildi:</strong> @ViewBag.Istenildi
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="alert alert-info">
+                <strong>Çalışılıyor:</strong> @ViewBag.Calisiliyor
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="alert alert-success">
+                <strong>Sonuçlandı:</strong> @ViewBag.Sonuclandi
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="alert alert-danger">
+                <strong>İptal:</strong> @ViewBag.Iptal
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>İstenme Tarihi</th>
+                    <th>Hasta</th>
+                    <th>Doktor</th>
+                    <th>Tahlil Adı</th>
+                    <th>Durum</th>
+                    <th>Sonuç Tarihi</th>
+                    <th>Sonuç</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">
+                            Seçilen tarih aralığında tahlil bulunamadı.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var tahlil in Model)
+                    {
+                        <tr>
+                            <td>@tahlil.IstenmeTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+
+                            <td>
+                                @tahlil.Muayene?.Hasta?.Ad @tahlil.Muayene?.Hasta?.Soyad
+                                <br />
+                                <small class="text-muted">@tahlil.Muayene?.Hasta?.TcKimlikNo</small>
+                            </td>
+
+                            <td>
+                                Dr. @tahlil.Muayene?.Doktor?.Ad @tahlil.Muayene?.Doktor?.Soyad
+                            </td>
+
+                            <td>@tahlil.TahlilAdi</td>
+                            <td>@tahlil.Durum</td>
+
+                            <td>
+                                @if (tahlil.SonucTarihi != null)
+                                {
+                                    @tahlil.SonucTarihi.Value.ToString("dd.MM.yyyy HH:mm")
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Henüz yok</span>
+                                }
+                            </td>
+
+                            <td>@tahlil.Sonuc</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

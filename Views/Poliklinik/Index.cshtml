@@ -1,0 +1,103 @@
+﻿@model List<HBYS.Web.Models.Poliklinik>
+
+@{
+    ViewData["Title"] = "Poliklinik İşlemleri";
+}
+
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3>Poliklinik İşlemleri</h3>
+            <p class="text-muted mb-0">Poliklinik kayıtlarını listele, ara, ekle, güncelle ve sil.</p>
+        </div>
+
+        <a asp-controller="Poliklinik" asp-action="Create" class="btn btn-main">
+            Yeni Poliklinik Ekle
+        </a>
+    </div>
+
+    @if (TempData["Basari"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Basari"]
+        </div>
+    }
+
+    @if (TempData["Hata"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Hata"]
+        </div>
+    }
+
+    <form asp-controller="Poliklinik" asp-action="Index" method="get" class="row g-2 mb-3">
+        <div class="col-md-10">
+            <input type="text"
+                   name="arama"
+                   value="@ViewBag.Arama"
+                   class="form-control"
+                   placeholder="Poliklinik adı veya açıklama ile ara..." />
+        </div>
+
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-outline-primary w-100">Ara</button>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Poliklinik Adı</th>
+                    <th>Açıklama</th>
+                    <th>Aktif Doktor Sayısı</th>
+                    <th style="width: 190px;">İşlemler</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">
+                            Kayıtlı poliklinik bulunamadı.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var poliklinik in Model)
+                    {
+                        <tr>
+                            <td>@poliklinik.PoliklinikAdi</td>
+                            <td>@poliklinik.Aciklama</td>
+                            <td>@poliklinik.Doktorlar.Count(d => d.AktifMi)</td>
+                            <td>
+                                <a asp-controller="Poliklinik"
+                                   asp-action="Edit"
+                                   asp-route-id="@poliklinik.PoliklinikId"
+                                   class="btn btn-sm btn-warning">
+                                    Güncelle
+                                </a>
+
+                                <form asp-controller="Poliklinik"
+                                      asp-action="Delete"
+                                      asp-route-id="@poliklinik.PoliklinikId"
+                                      method="post"
+                                      class="d-inline"
+                                      onsubmit="return confirm('Bu polikliniği silmek istediğinize emin misiniz?');">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        Sil
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

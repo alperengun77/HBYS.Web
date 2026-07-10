@@ -1,0 +1,79 @@
+﻿@model HBYS.Web.Models.Muayene
+
+@{
+    ViewData["Title"] = "Muayene Güncelle";
+}
+
+<div class="page-card">
+    <div class="mb-3">
+        <h3>Muayene Güncelle</h3>
+        <p class="text-muted mb-0">Seçili muayene kaydını düzenle.</p>
+    </div>
+
+    <form asp-controller="Muayene" asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" asp-for="MuayeneId" />
+
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="HastaId" class="form-label">Hasta</label>
+                <select asp-for="HastaId" asp-items="ViewBag.Hastalar" class="form-select">
+                    <option value="">Hasta seçiniz</option>
+                </select>
+                <span asp-validation-for="HastaId" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="DoktorId" class="form-label">Doktor</label>
+                <select asp-for="DoktorId" asp-items="ViewBag.Doktorlar" class="form-select">
+                    <option value="">Doktor seçiniz</option>
+                </select>
+                <span asp-validation-for="DoktorId" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-12">
+                <label asp-for="RandevuId" class="form-label">Bağlı Randevu</label>
+                <select asp-for="RandevuId" asp-items="ViewBag.Randevular" class="form-select">
+                    <option value="">Randevusuz muayene</option>
+                </select>
+                <span asp-validation-for="RandevuId" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="MuayeneTarihi" class="form-label">Muayene Tarihi</label>
+                <input asp-for="MuayeneTarihi"
+                       type="datetime-local"
+                       step="60"
+                       class="form-control"
+                       value="@Model.MuayeneTarihi.ToString("yyyy-MM-ddTHH:mm")" />
+                <span asp-validation-for="MuayeneTarihi" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-12">
+                <label asp-for="Sikayet" class="form-label">Şikayet</label>
+                <textarea asp-for="Sikayet" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Sikayet" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-12">
+                <label asp-for="Tani" class="form-label">Tanı</label>
+                <textarea asp-for="Tani" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Tani" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-12">
+                <label asp-for="TedaviNotu" class="form-label">Tedavi Notu</label>
+                <textarea asp-for="TedaviNotu" class="form-control" rows="4"></textarea>
+                <span asp-validation-for="TedaviNotu" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-main">Güncelle</button>
+            <a asp-controller="Muayene" asp-action="Index" class="btn btn-secondary">Geri Dön</a>
+        </div>
+    </form>
+</div>

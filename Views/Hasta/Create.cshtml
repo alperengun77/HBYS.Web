@@ -1,0 +1,101 @@
+﻿@model HBYS.Web.Models.Hasta
+
+@{
+    ViewData["Title"] = "Yeni Hasta Ekle";
+}
+
+<div class="page-card">
+    <div class="mb-3">
+        <h3>Yeni Hasta Ekle</h3>
+        <p class="text-muted mb-0">Yeni hasta kaydı oluştur.</p>
+    </div>
+
+    <form asp-controller="Hasta" asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label asp-for="TcKimlikNo" class="form-label">TC Kimlik No</label>
+                <input asp-for="TcKimlikNo"
+                       class="form-control only-digits"
+                       maxlength="11"
+                       inputmode="numeric"
+                       placeholder="11 haneli TC kimlik no" />
+                <span asp-validation-for="TcKimlikNo" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="Ad" class="form-label">Ad</label>
+                <input asp-for="Ad" class="form-control" />
+                <span asp-validation-for="Ad" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="Soyad" class="form-label">Soyad</label>
+                <input asp-for="Soyad" class="form-control" />
+                <span asp-validation-for="Soyad" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="DogumTarihi" class="form-label">Doğum Tarihi</label>
+                <input asp-for="DogumTarihi" type="date" class="form-control" />
+                <span asp-validation-for="DogumTarihi" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="Cinsiyet" class="form-label">Cinsiyet</label>
+                <select asp-for="Cinsiyet" class="form-select">
+                    <option value="">Seçiniz</option>
+                    <option value="Kadın">Kadın</option>
+                    <option value="Erkek">Erkek</option>
+                </select>
+                <span asp-validation-for="Cinsiyet" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="KanGrubu" class="form-label">Kan Grubu</label>
+                <select asp-for="KanGrubu" class="form-select">
+                    <option value="">Seçiniz</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="0+">0+</option>
+                    <option value="0-">0-</option>
+                </select>
+                <span asp-validation-for="KanGrubu" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="Telefon" class="form-label">Telefon</label>
+                <input asp-for="Telefon"
+                       class="form-control only-digits"
+                       maxlength="11"
+                       inputmode="numeric"
+                       placeholder="Örn: 05551234567" />
+                <span asp-validation-for="Telefon" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="Eposta" class="form-label">E-posta</label>
+                <input asp-for="Eposta" class="form-control" />
+                <span asp-validation-for="Eposta" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-12">
+                <label asp-for="Adres" class="form-label">Adres</label>
+                <textarea asp-for="Adres" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Adres" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-main">Kaydet</button>
+            <a asp-controller="Hasta" asp-action="Index" class="btn btn-secondary">Geri Dön</a>
+        </div>
+    </form>
+</div>

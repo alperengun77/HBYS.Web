@@ -1,0 +1,120 @@
+﻿@model List<HBYS.Web.Models.Kullanici>
+
+@{
+    ViewData["Title"] = "Kullanıcı İşlemleri";
+}
+
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3>Kullanıcı İşlemleri</h3>
+            <p class="text-muted mb-0">Sisteme giriş yapacak kullanıcıları yönet.</p>
+        </div>
+
+        <a asp-controller="Kullanici" asp-action="Create" class="btn btn-main">
+            Yeni Kullanıcı Ekle
+        </a>
+    </div>
+
+    @if (TempData["Basari"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Basari"]
+        </div>
+    }
+
+    @if (TempData["Hata"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Hata"]
+        </div>
+    }
+
+    <form asp-controller="Kullanici" asp-action="Index" method="get" class="row g-2 mb-3">
+        <div class="col-md-10">
+            <input type="text"
+                   name="arama"
+                   value="@ViewBag.Arama"
+                   class="form-control"
+                   placeholder="Kullanıcı adı, ad soyad, e-posta, rol veya doktor ile ara..." />
+        </div>
+
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-outline-primary w-100">Ara</button>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Kullanıcı Adı</th>
+                    <th>Ad Soyad</th>
+                    <th>Rol</th>
+                    <th>Bağlı Doktor</th>
+                    <th>E-posta</th>
+                    <th>Kayıt Tarihi</th>
+                    <th style="width: 190px;">İşlemler</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">
+                            Kayıtlı kullanıcı bulunamadı.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var kullanici in Model)
+                    {
+                        <tr>
+                            <td>@kullanici.KullaniciAdi</td>
+                            <td>@kullanici.AdSoyad</td>
+                            <td>
+                                <span class="badge bg-primary">@kullanici.Rol?.RolAdi</span>
+                            </td>
+                            <td>
+                                @if (kullanici.Doktor != null)
+                                {
+                                    <span>Dr. @kullanici.Doktor.Ad @kullanici.Doktor.Soyad</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Yok</span>
+                                }
+                            </td>
+                            <td>@kullanici.Eposta</td>
+                            <td>@kullanici.KayitTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>
+                                <a asp-controller="Kullanici"
+                                   asp-action="Edit"
+                                   asp-route-id="@kullanici.KullaniciId"
+                                   class="btn btn-sm btn-warning">
+                                    Güncelle
+                                </a>
+
+                                <form asp-controller="Kullanici"
+                                      asp-action="Delete"
+                                      asp-route-id="@kullanici.KullaniciId"
+                                      method="post"
+                                      class="d-inline"
+                                      onsubmit="return confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?');">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        Sil
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

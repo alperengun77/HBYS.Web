@@ -1,0 +1,135 @@
+﻿@model HBYS.Web.Models.Tahlil
+
+@{
+    ViewData["Title"] = "Tahlil Detay";
+}
+
+<div class="print-header">
+    <h2>HBYS Web</h2>
+    <h4>Tahlil Sonuç Formu</h4>
+    <p>Yazdırma Tarihi: @DateTime.Now.ToString("dd.MM.yyyy HH:mm")</p>
+</div>
+
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3>Tahlil Detay</h3>
+            <p class="text-muted mb-0">Muayeneye bağlı tahlil ve sonuç bilgileri.</p>
+        </div>
+
+        <div class="no-print">
+            <button type="button" onclick="window.print()" class="btn btn-main">
+                Yazdır
+            </button>
+
+            <a asp-controller="Tahlil" asp-action="Edit" asp-route-id="@Model.TahlilId" class="btn btn-warning">
+                Güncelle
+            </a>
+
+            <a asp-controller="Tahlil" asp-action="Index" class="btn btn-secondary">
+                Geri Dön
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5>Hasta Bilgileri</h5>
+                    <hr />
+
+                    <p><strong>Hasta:</strong> @Model.Muayene?.Hasta?.Ad @Model.Muayene?.Hasta?.Soyad</p>
+                    <p><strong>TC Kimlik No:</strong> @Model.Muayene?.Hasta?.TcKimlikNo</p>
+                    <p><strong>Telefon:</strong> @Model.Muayene?.Hasta?.Telefon</p>
+                    <p><strong>Kan Grubu:</strong> @Model.Muayene?.Hasta?.KanGrubu</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5>Doktor Bilgileri</h5>
+                    <hr />
+
+                    <p><strong>Doktor:</strong> @Model.Muayene?.Doktor?.Unvan @Model.Muayene?.Doktor?.Ad @Model.Muayene?.Doktor?.Soyad</p>
+                    <p><strong>Sicil No:</strong> @Model.Muayene?.Doktor?.SicilNo</p>
+                    <p><strong>E-posta:</strong> @Model.Muayene?.Doktor?.Eposta</p>
+                    <p><strong>Telefon:</strong> @Model.Muayene?.Doktor?.Telefon</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5>Muayene Bilgileri</h5>
+                    <hr />
+
+                    <p><strong>Muayene Tarihi:</strong> @Model.Muayene?.MuayeneTarihi.ToString("dd.MM.yyyy HH:mm")</p>
+                    <p><strong>Tanı:</strong> @Model.Muayene?.Tani</p>
+                    <p><strong>Şikayet:</strong> @Model.Muayene?.Sikayet</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-card mt-4">
+    <h5>Tahlil Bilgileri</h5>
+    <hr />
+
+    <table class="table table-bordered align-middle">
+        <tbody>
+            <tr>
+                <th style="width: 220px;">Tahlil Adı</th>
+                <td>@Model.TahlilAdi</td>
+            </tr>
+
+            <tr>
+                <th>Durum</th>
+                <td>@Model.Durum</td>
+            </tr>
+
+            <tr>
+                <th>İstenme Tarihi</th>
+                <td>@Model.IstenmeTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+            </tr>
+
+            <tr>
+                <th>Sonuç Tarihi</th>
+                <td>
+                    @if (Model.SonucTarihi != null)
+                    {
+                        @Model.SonucTarihi.Value.ToString("dd.MM.yyyy HH:mm")
+                    }
+                    else
+                    {
+                        <span class="text-muted">Henüz sonuçlanmadı</span>
+                    }
+                </td>
+            </tr>
+
+            <tr>
+                <th>Sonuç</th>
+                <td>@Model.Sonuc</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="page-card mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            <p><strong>Laborant / Onay:</strong></p>
+            <br />
+            <p>........................................</p>
+        </div>
+
+        <div class="col-md-6 text-end">
+            <p><strong>HBYS Web Tahlil Çıktısı</strong></p>
+            <p class="text-muted">Bu belge staj projesi kapsamında oluşturulmuştur.</p>
+        </div>
+    </div>
+</div>

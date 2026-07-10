@@ -1,0 +1,73 @@
+﻿@model HBYS.Web.Models.Kullanici
+
+@{
+    ViewData["Title"] = "Yeni Kullanıcı Ekle";
+}
+
+<div class="page-card">
+    <div class="mb-3">
+        <h3>Yeni Kullanıcı Ekle</h3>
+        <p class="text-muted mb-0">Sisteme giriş yapacak yeni kullanıcı oluştur.</p>
+    </div>
+
+    <form asp-controller="Kullanici" asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label asp-for="KullaniciAdi" class="form-label">Kullanıcı Adı</label>
+                <input asp-for="KullaniciAdi" class="form-control" placeholder="Örn: sekreter1" />
+                <span asp-validation-for="KullaniciAdi" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="Sifre" class="form-label">Şifre</label>
+                <input asp-for="Sifre" type="text" class="form-control" placeholder="Örn: 1234" />
+                <span asp-validation-for="Sifre" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="AdSoyad" class="form-label">Ad Soyad</label>
+                <input asp-for="AdSoyad" class="form-control" />
+                <span asp-validation-for="AdSoyad" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="Eposta" class="form-label">E-posta</label>
+                <input asp-for="Eposta" class="form-control" />
+                <span asp-validation-for="Eposta" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="RolId" class="form-label">Rol</label>
+                <select asp-for="RolId" asp-items="ViewBag.Roller" class="form-select">
+                    <option value="">Rol seçiniz</option>
+                </select>
+                <span asp-validation-for="RolId" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="DoktorId" class="form-label">Bağlı Doktor</label>
+                <select asp-for="DoktorId" asp-items="ViewBag.Doktorlar" class="form-select">
+                    <option value="">Doktor seçmeyiniz</option>
+                </select>
+                <span asp-validation-for="DoktorId" class="text-danger"></span>
+                <small class="text-muted">
+                    Sadece Doktor rolü için doktor seç.
+                </small>
+            </div>
+        </div>
+
+        <div class="alert alert-info mt-4">
+            Doktor rolündeki kullanıcı için bağlı doktor seçmek zorunludur.
+            Sekreter, Laborant, Eczane ve Yönetici rollerinde doktor seçilmez.
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-main">Kaydet</button>
+            <a asp-controller="Kullanici" asp-action="Index" class="btn btn-secondary">Geri Dön</a>
+        </div>
+    </form>
+</div>

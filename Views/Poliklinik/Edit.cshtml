@@ -1,0 +1,39 @@
+﻿@model HBYS.Web.Models.Poliklinik
+
+@{
+    ViewData["Title"] = "Poliklinik Güncelle";
+}
+
+<div class="page-card">
+    <div class="mb-3">
+        <h3>Poliklinik Güncelle</h3>
+        <p class="text-muted mb-0">Seçili poliklinik kaydını düzenle.</p>
+    </div>
+
+    <form asp-controller="Poliklinik" asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" asp-for="PoliklinikId" />
+
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="PoliklinikAdi" class="form-label">Poliklinik Adı</label>
+                <input asp-for="PoliklinikAdi" class="form-control" />
+                <span asp-validation-for="PoliklinikAdi" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-12">
+                <label asp-for="Aciklama" class="form-label">Açıklama</label>
+                <textarea asp-for="Aciklama" class="form-control" rows="4"></textarea>
+                <span asp-validation-for="Aciklama" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-main">Güncelle</button>
+            <a asp-controller="Poliklinik" asp-action="Index" class="btn btn-secondary">Geri Dön</a>
+        </div>
+    </form>
+</div>

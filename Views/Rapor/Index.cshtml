@@ -1,0 +1,139 @@
+﻿@{
+    ViewData["Title"] = "Raporlar";
+}
+
+<div class="page-card">
+    <div class="mb-3">
+        <h3>Raporlar</h3>
+        <p class="text-muted mb-0">Sistemdeki genel durum ve işlem raporlarını görüntüle.</p>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Hasta</h6>
+                    <h2>@ViewBag.HastaSayisi</h2>
+                    <p class="mb-0">Aktif hasta</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Doktor</h6>
+                    <h2>@ViewBag.DoktorSayisi</h2>
+                    <p class="mb-0">Aktif doktor</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Poliklinik</h6>
+                    <h2>@ViewBag.PoliklinikSayisi</h2>
+                    <p class="mb-0">Aktif poliklinik</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Randevu</h6>
+                    <h2>@ViewBag.RandevuSayisi</h2>
+                    <p class="mb-0">Aktif randevu</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mt-1">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Muayene</h6>
+                    <h2>@ViewBag.MuayeneSayisi</h2>
+                    <p class="mb-0">Aktif muayene</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Reçete</h6>
+                    <h2>@ViewBag.ReceteSayisi</h2>
+                    <p class="mb-0">Aktif reçete</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Tahlil</h6>
+                    <h2>@ViewBag.TahlilSayisi</h2>
+                    <p class="mb-0">Aktif tahlil</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Bekleyen Tahlil</h6>
+                    <h2>@ViewBag.BekleyenTahlilSayisi</h2>
+                    <p class="mb-0">Sonuçlanmamış</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-4" />
+
+    <h5>Rapor Seçenekleri</h5>
+
+    <div class="row g-3 mt-1">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5>Günlük Randevu Raporu</h5>
+                    <p class="text-muted">Seçilen güne ait randevuları ve durum sayılarını gösterir.</p>
+
+                    <a asp-controller="Rapor" asp-action="GunlukRandevu" class="btn btn-main">
+                        Raporu Aç
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5>Muayene Raporu</h5>
+                    <p class="text-muted">Tarih aralığına göre yapılan muayeneleri listeler.</p>
+
+                    <a asp-controller="Rapor" asp-action="MuayeneRaporu" class="btn btn-main">
+                        Raporu Aç
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5>Tahlil Raporu</h5>
+                    <p class="text-muted">Tarih aralığına göre tahlil durumlarını ve sonuçları gösterir.</p>
+
+                    <a asp-controller="Rapor" asp-action="TahlilRaporu" class="btn btn-main">
+                        Raporu Aç
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,150 @@
+﻿@model List<HBYS.Web.Models.Muayene>
+
+@{
+    ViewData["Title"] = "Muayene İşlemleri";
+}
+
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3>Muayene İşlemleri</h3>
+            <p class="text-muted mb-0">Muayene kayıtlarını listele, ara, ekle, güncelle ve sil.</p>
+        </div>
+
+        <a asp-controller="Muayene" asp-action="Create" class="btn btn-main">
+            Yeni Muayene Ekle
+        </a>
+    </div>
+
+    @if (TempData["Basari"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Basari"]
+        </div>
+    }
+
+    @if (TempData["Hata"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Hata"]
+        </div>
+    }
+
+    <form asp-controller="Muayene" asp-action="Index" method="get" class="row g-2 mb-3">
+        <div class="col-md-5">
+            <input type="text"
+                   name="arama"
+                   value="@ViewBag.Arama"
+                   class="form-control"
+                   placeholder="Hasta, doktor, TC, şikayet veya tanı ile ara..." />
+        </div>
+
+        <div class="col-md-2">
+            <input type="date"
+                   name="baslangicTarihi"
+                   value="@ViewBag.BaslangicTarihi"
+                   class="form-control" />
+        </div>
+
+        <div class="col-md-2">
+            <input type="date"
+                   name="bitisTarihi"
+                   value="@ViewBag.BitisTarihi"
+                   class="form-control" />
+        </div>
+
+        <div class="col-md-1">
+            <button type="submit" class="btn btn-outline-primary w-100">
+                Filtrele
+            </button>
+        </div>
+
+        <div class="col-md-2">
+            <a asp-controller="Muayene" asp-action="Index" class="btn btn-outline-secondary w-100">
+                Temizle
+            </a>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Muayene Tarihi</th>
+                    <th>Hasta</th>
+                    <th>Doktor</th>
+                    <th>Randevu</th>
+                    <th>Şikayet</th>
+                    <th>Tanı</th>
+                    <th style="width: 190px;">İşlemler</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">
+                            Kayıtlı muayene bulunamadı.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var muayene in Model)
+                    {
+                        <tr>
+                            <td>@muayene.MuayeneTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>
+                                @muayene.Hasta?.Ad @muayene.Hasta?.Soyad
+                                <br />
+                                <small class="text-muted">@muayene.Hasta?.TcKimlikNo</small>
+                            </td>
+                            <td>@muayene.Doktor?.Ad @muayene.Doktor?.Soyad</td>
+                            <td>
+                                @if (muayene.Randevu != null)
+                                {
+                                    <span>@muayene.Randevu.RandevuTarihiSaati.ToString("dd.MM.yyyy HH:mm")</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Randevusuz</span>
+                                }
+                            </td>
+                            <td>@muayene.Sikayet</td>
+                            <td>@muayene.Tani</td>
+                            <td>
+                                <a asp-controller="Muayene"
+                                   asp-action="Details"
+                                   asp-route-id="@muayene.MuayeneId"
+                                   class="btn btn-sm btn-info">
+                                    Detay
+                                </a>
+                                <a asp-controller="Muayene"
+                                   asp-action="Edit"
+                                   asp-route-id="@muayene.MuayeneId"
+                                   class="btn btn-sm btn-warning">
+                                    Güncelle
+                                </a>
+
+                                <form asp-controller="Muayene"
+                                      asp-action="Delete"
+                                      asp-route-id="@muayene.MuayeneId"
+                                      method="post"
+                                      class="d-inline"
+                                      onsubmit="return confirm('Bu muayene kaydını silmek istediğinize emin misiniz?');">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        Sil
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,126 @@
+﻿@model HBYS.Web.Models.Randevu
+
+@using HBYS.Web.Models
+
+@{
+    ViewData["Title"] = "Randevu Detay";
+    var muayene = ViewBag.Muayene as Muayene;
+}
+<div class="print-header">
+    <h2>HBYS Web</h2>
+    <h4>Randevu Bilgi Formu</h4>
+    <p>Yazdırma Tarihi: @DateTime.Now.ToString("dd.MM.yyyy HH:mm")</p>
+</div>
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3>Randevu Detay</h3>
+            <p class="text-muted mb-0">Randevuya ait hasta, doktor ve durum bilgileri.</p>
+        </div>
+
+        <div class="no-print">
+            <button type="button" onclick="window.print()" class="btn btn-main">
+                Yazdır
+            </button>
+
+            <a asp-controller="Randevu" asp-action="Edit" asp-route-id="@Model.RandevuId" class="btn btn-warning">
+                Güncelle
+            </a>
+
+            <a asp-controller="Randevu" asp-action="Index" class="btn btn-secondary">
+                Geri Dön
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5>Randevu Bilgileri</h5>
+                    <hr />
+
+                    <p><strong>Tarih / Saat:</strong> @Model.RandevuTarihiSaati.ToString("dd.MM.yyyy HH:mm")</p>
+                    <p><strong>Durum:</strong> @Model.Durum</p>
+                    <p><strong>Poliklinik:</strong> @Model.Poliklinik?.PoliklinikAdi</p>
+                    <p><strong>Kayıt Tarihi:</strong> @Model.KayitTarihi.ToString("dd.MM.yyyy HH:mm")</p>
+                    <p><strong>Açıklama:</strong> @Model.Aciklama</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5>Hasta Bilgileri</h5>
+                    <hr />
+
+                    <p><strong>Hasta:</strong> @Model.Hasta?.Ad @Model.Hasta?.Soyad</p>
+                    <p><strong>TC:</strong> @Model.Hasta?.TcKimlikNo</p>
+                    <p><strong>Telefon:</strong> @Model.Hasta?.Telefon</p>
+                    <p><strong>Kan Grubu:</strong> @Model.Hasta?.KanGrubu</p>
+
+                    @if (Model.Hasta != null)
+                    {
+                        <a asp-controller="Hasta"
+                           asp-action="Details"
+                           asp-route-id="@Model.Hasta.HastaId"
+                           class="btn btn-sm btn-info">
+                            Hasta Detayına Git
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5>Doktor Bilgileri</h5>
+                    <hr />
+
+                    <p><strong>Doktor:</strong> @Model.Doktor?.Unvan @Model.Doktor?.Ad @Model.Doktor?.Soyad</p>
+                    <p><strong>Sicil No:</strong> @Model.Doktor?.SicilNo</p>
+                    <p><strong>Telefon:</strong> @Model.Doktor?.Telefon</p>
+                    <p><strong>E-posta:</strong> @Model.Doktor?.Eposta</p>
+
+                    @if (Model.Doktor != null)
+                    {
+                        <a asp-controller="Doktor"
+                           asp-action="Details"
+                           asp-route-id="@Model.Doktor.DoktorId"
+                           class="btn btn-sm btn-info">
+                            Doktor Detayına Git
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-card mt-4">
+    <h5>Bağlı Muayene</h5>
+    <hr />
+
+    @if (muayene == null)
+    {
+        <div class="alert alert-warning">
+            Bu randevuya bağlı muayene kaydı bulunmuyor.
+        </div>
+    }
+    else
+    {
+        <p><strong>Muayene Tarihi:</strong> @muayene.MuayeneTarihi.ToString("dd.MM.yyyy HH:mm")</p>
+        <p><strong>Şikayet:</strong> @muayene.Sikayet</p>
+        <p><strong>Tanı:</strong> @muayene.Tani</p>
+        <p><strong>Tedavi Notu:</strong> @muayene.TedaviNotu</p>
+
+        <a asp-controller="Muayene"
+           asp-action="Details"
+           asp-route-id="@muayene.MuayeneId"
+           class="btn btn-main">
+            Muayene Detayına Git
+        </a>
+    }
+</div>

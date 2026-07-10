@@ -1,0 +1,132 @@
+﻿@model List<HBYS.Web.Models.Recete>
+
+@{
+    ViewData["Title"] = "Reçete İşlemleri";
+}
+
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3>Reçete İşlemleri</h3>
+            <p class="text-muted mb-0">Reçete kayıtlarını listele, ara, ekle, güncelle ve sil.</p>
+        </div>
+
+        <a asp-controller="Recete" asp-action="Create" class="btn btn-main">
+            Yeni Reçete Ekle
+        </a>
+    </div>
+
+    @if (TempData["Basari"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Basari"]
+        </div>
+    }
+
+    @if (TempData["Hata"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Hata"]
+        </div>
+    }
+
+    <form asp-controller="Recete" asp-action="Index" method="get" class="row g-2 mb-3">
+        <div class="col-md-10">
+            <input type="text"
+                   name="arama"
+                   value="@ViewBag.Arama"
+                   class="form-control"
+                   placeholder="İlaç, hasta, doktor, TC veya kullanım şekli ile ara..." />
+        </div>
+
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-outline-primary w-100">Ara</button>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Kayıt Tarihi</th>
+                    <th>Hasta</th>
+                    <th>Doktor</th>
+                    <th>İlaç Adı</th>
+                    <th>Doz</th>
+                    <th>Kullanım Şekli</th>
+                    <th>Kullanım Süresi</th>
+                    <th style="width: 190px;">İşlemler</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="8" class="text-center text-muted">
+                            Kayıtlı reçete bulunamadı.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var recete in Model)
+                    {
+                        <tr>
+                            <td>@recete.KayitTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>
+                                @recete.Muayene?.Hasta?.Ad @recete.Muayene?.Hasta?.Soyad
+                                <br />
+                                <small class="text-muted">@recete.Muayene?.Hasta?.TcKimlikNo</small>
+                            </td>
+                            <td>
+                                Dr. @recete.Muayene?.Doktor?.Ad @recete.Muayene?.Doktor?.Soyad
+                            </td>
+                            <td>@recete.IlacAdi</td>
+                            <td>@recete.Doz</td>
+                            <td>@recete.KullanimSekli</td>
+                            <td>@recete.KullanimSuresi</td>
+                            <td>
+                                <a asp-controller="Recete"
+                                   asp-action="Details"
+                                   asp-route-id="@recete.ReceteId"
+                                   class="btn btn-sm btn-info">
+                                    Detay
+                                </a>
+                                <a asp-controller="Recete"
+                                   asp-action="Edit"
+                                   asp-route-id="@recete.ReceteId"
+                                   class="btn btn-sm btn-warning">
+                                    Güncelle
+                                </a>
+
+                                <form asp-controller="Recete"
+                                      asp-action="Delete"
+                                      asp-route-id="@recete.ReceteId"
+                                      method="post"
+                                      class="d-inline"
+                                      onsubmit="return confirm('Bu reçete kaydını silmek istediğinize emin misiniz?');">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        Sil
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+
+                        @if (!string.IsNullOrWhiteSpace(recete.Aciklama))
+                        {
+                            <tr>
+                                <td colspan="8" class="bg-light">
+                                    <strong>Açıklama:</strong> @recete.Aciklama
+                                </td>
+                            </tr>
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

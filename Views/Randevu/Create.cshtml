@@ -1,0 +1,175 @@
+﻿@model HBYS.Web.Models.Randevu
+
+@{
+    ViewData["Title"] = "Yeni Randevu Ekle";
+
+    bool doktorMu = ViewBag.DoktorMu == true;
+}
+
+<div class="page-card">
+    <h3>Yeni Randevu Ekle</h3>
+    <p class="text-muted">
+        Hasta, poliklinik, doktor, tarih ve saat bilgilerini seçerek yeni randevu oluştur.
+    </p>
+
+    <form asp-controller="Randevu" asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="HastaId" class="form-label">Hasta</label>
+                <select asp-for="HastaId" asp-items="ViewBag.Hastalar" class="form-select">
+                    <option value="">Hasta seçiniz</option>
+                </select>
+                <span asp-validation-for="HastaId" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label asp-for="PoliklinikId" class="form-label">Poliklinik</label>
+
+                @if (doktorMu)
+                {
+                    <select asp-for="PoliklinikId"
+                            asp-items="ViewBag.Poliklinikler"
+                            id="poliklinikSelect"
+                            class="form-select"
+                            disabled>
+                        <option value="">Poliklinik seçiniz</option>
+                    </select>
+
+                    <input type="hidden" asp-for="PoliklinikId" />
+                }
+                else
+                {
+                    <select asp-for="PoliklinikId"
+                            asp-items="ViewBag.Poliklinikler"
+                            id="poliklinikSelect"
+                            class="form-select">
+                        <option value="">Poliklinik seçiniz</option>
+                    </select>
+                }
+
+                <span asp-validation-for="PoliklinikId" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label asp-for="DoktorId" class="form-label">Doktor</label>
+
+                @if (doktorMu)
+                {
+                    <select asp-for="DoktorId"
+                            asp-items="ViewBag.Doktorlar"
+                            id="doktorSelect"
+                            class="form-select"
+                            disabled>
+                        <option value="">Doktor seçiniz</option>
+                    </select>
+
+                    <input type="hidden" asp-for="DoktorId" />
+                }
+                else
+                {
+                    <select asp-for="DoktorId"
+                            asp-items="ViewBag.Doktorlar"
+                            id="doktorSelect"
+                            class="form-select">
+                        <option value="">Doktor seçiniz</option>
+                    </select>
+                }
+
+                <span asp-validation-for="DoktorId" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Randevu Tarihi</label>
+                <input type="date"
+                       name="randevuTarihi"
+                       value="@ViewBag.RandevuTarihi"
+                       class="form-control" />
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Randevu Saati</label>
+                <select name="randevuSaati" class="form-select">
+                    <option value="">Saat seçiniz</option>
+
+                    @foreach (string saat in ViewBag.Saatler)
+                    {
+                        if (ViewBag.RandevuSaati == saat)
+                        {
+                            <option value="@saat" selected>@saat</option>
+                        }
+                        else
+                        {
+                            <option value="@saat">@saat</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <span asp-validation-for="RandevuTarihiSaati" class="text-danger"></span>
+                <small class="text-muted d-block">
+                    Randevu saatleri sadece 15 dakikalık aralıklarla seçilebilir.
+                </small>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label asp-for="Durum" class="form-label">Durum</label>
+                <select asp-for="Durum" class="form-select">
+                    <option value="Bekliyor">Bekliyor</option>
+                    <option value="Tamamlandi">Tamamlandı</option>
+                    <option value="Iptal">İptal</option>
+                </select>
+                <span asp-validation-for="Durum" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-12 mb-3">
+                <label asp-for="Aciklama" class="form-label">Açıklama</label>
+                <textarea asp-for="Aciklama" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Aciklama" class="text-danger"></span>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-main">
+            Kaydet
+        </button>
+
+        <a asp-controller="Randevu" asp-action="Index" class="btn btn-secondary">
+            Geri Dön
+        </a>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const poliklinikSelect = document.getElementById("poliklinikSelect");
+        const doktorSelect = document.getElementById("doktorSelect");
+        const doktorMu = "@doktorMu".toLowerCase() === "true";
+
+        if (!poliklinikSelect || !doktorSelect || doktorMu) {
+            return;
+        }
+
+        poliklinikSelect.addEventListener("change", function () {
+            const poliklinikId = this.value;
+
+            doktorSelect.innerHTML = "";
+            doktorSelect.appendChild(new Option("Doktor seçiniz", ""));
+
+            if (!poliklinikId) {
+                return;
+            }
+
+            fetch(`/Randevu/DoktorlariGetir?poliklinikId=${poliklinikId}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(function (doktor) {
+                        doktorSelect.appendChild(new Option(doktor.adSoyad, doktor.doktorId));
+                    });
+                });
+        });
+    });
+</script>

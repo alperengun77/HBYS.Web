@@ -1,0 +1,332 @@
+﻿@using Microsoft.AspNetCore.Http
+
+@{
+    string? adSoyad = Context.Session.GetString("AdSoyad");
+    string? rolAdi = Context.Session.GetString("RolAdi");
+
+    bool girisVarMi = !string.IsNullOrEmpty(adSoyad);
+
+    bool adminMi = rolAdi == "Admin";
+    bool doktorMu = rolAdi == "Doktor";
+    bool sekreterMi = rolAdi == "Sekreter";
+    bool laborantMi = rolAdi == "Laborant";
+    bool eczaneMi = rolAdi == "Eczane";
+    bool yoneticiMi = rolAdi == "Yonetici";
+
+    bool canHasta = adminMi || sekreterMi || doktorMu;
+    bool canDoktor = adminMi || sekreterMi || yoneticiMi;
+    bool canPoliklinik = adminMi || yoneticiMi;
+    bool canRandevu = adminMi || sekreterMi || doktorMu;
+    bool canMuayene = adminMi || doktorMu;
+    bool canRecete = adminMi || doktorMu || eczaneMi;
+    bool canTahlil = adminMi || doktorMu || laborantMi;
+    bool canKullanici = adminMi;
+    bool canLog = adminMi || yoneticiMi;
+    bool canRapor = adminMi || yoneticiMi || sekreterMi || doktorMu;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - HBYS Web</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <style>
+            body {
+                background-color: #f4f6f9;
+                font-family: Arial, sans-serif;
+            }
+
+            .topbar {
+                background-color: #1f3c88;
+                color: white;
+                padding: 12px 24px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            }
+
+            .topbar-title {
+                font-size: 20px;
+                font-weight: bold;
+                margin: 0;
+            }
+
+            .sidebar {
+                min-height: calc(100vh - 60px);
+                background-color: #0b132b;
+                padding-top: 20px;
+            }
+
+                .sidebar a {
+                    display: block;
+                    color: #dbe4ff;
+                    text-decoration: none;
+                    padding: 12px 20px;
+                    margin: 4px 10px;
+                    border-radius: 8px;
+                }
+
+                    .sidebar a:hover {
+                        background-color: #1f3c88;
+                        color: white;
+                    }
+
+            .sidebar-section-title {
+                color: #8294c4;
+                font-size: 12px;
+                text-transform: uppercase;
+                margin: 16px 20px 6px 20px;
+                letter-spacing: 0.5px;
+            }
+
+            .content-area {
+                padding: 25px;
+            }
+
+            .page-card {
+                background-color: white;
+                border-radius: 14px;
+                padding: 22px;
+                box-shadow: 0 5px 18px rgba(0,0,0,0.06);
+            }
+
+            .btn-main {
+                background-color: #1f3c88;
+                color: white;
+                font-weight: bold;
+            }
+
+                .btn-main:hover {
+                    background-color: #162d66;
+                    color: white;
+                }
+
+            .table thead {
+                background-color: #1f3c88;
+                color: white;
+            }
+
+            .user-info {
+                font-size: 14px;
+                opacity: 0.95;
+            }
+
+            .role-badge {
+                background-color: #ffffff;
+                color: #1f3c88;
+                padding: 4px 10px;
+                border-radius: 20px;
+                font-weight: bold;
+                margin-left: 6px;
+            }
+
+            .print-header {
+                display: none;
+            }
+
+            @@media print {
+                body {
+                    background-color: white;
+                    font-size: 12px;
+                }
+
+                .topbar,
+                .sidebar,
+                .no-print {
+                    display: none !important;
+                }
+
+                .content-area {
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    flex: 0 0 100% !important;
+                    padding: 0 !important;
+                }
+
+                .container-fluid,
+                .row,
+                .col-md-10,
+                .col-md-12 {
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                }
+
+                .page-card,
+                .card {
+                    box-shadow: none !important;
+                    border: 1px solid #ddd !important;
+                    border-radius: 0 !important;
+                    page-break-inside: avoid;
+                }
+
+                .print-header {
+                    display: block;
+                    text-align: center;
+                    margin-bottom: 20px;
+                    border-bottom: 2px solid #000;
+                    padding-bottom: 10px;
+                }
+
+                table {
+                    font-size: 11px;
+                }
+
+                a {
+                    text-decoration: none;
+                    color: black;
+                }
+            }
+    </style>
+</head>
+<body>
+
+    <div class="topbar d-flex justify-content-between align-items-center">
+        <div>
+            <p class="topbar-title">🏥 HBYS Web</p>
+        </div>
+
+        <div class="user-info">
+            @if (girisVarMi)
+            {
+                <span>@adSoyad</span>
+                <span class="role-badge">@rolAdi</span>
+                <a asp-controller="Account" asp-action="Logout" class="btn btn-sm btn-danger ms-3">Çıkış</a>
+            }
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            @if (girisVarMi)
+            {
+                <div class="col-md-2 sidebar">
+                    <div class="sidebar-section-title">Genel</div>
+
+                    <a asp-controller="Dashboard" asp-action="Index">📊 Dashboard</a>
+
+                    @if (canHasta || canDoktor || canPoliklinik)
+                    {
+                        <div class="sidebar-section-title">Kayıt İşlemleri</div>
+                    }
+
+                    @if (canHasta)
+                    {
+                        <a asp-controller="Hasta" asp-action="Index">👤 Hasta İşlemleri</a>
+                    }
+
+                    @if (canDoktor)
+                    {
+                        <a asp-controller="Doktor" asp-action="Index">👨‍⚕️ Doktor İşlemleri</a>
+                    }
+
+                    @if (canPoliklinik)
+                    {
+                        <a asp-controller="Poliklinik" asp-action="Index">🏥 Poliklinik İşlemleri</a>
+                    }
+
+                    @if (canRandevu || canMuayene)
+                    {
+                        <div class="sidebar-section-title">Tedavi Süreci</div>
+                    }
+
+                    @if (canRandevu)
+                    {
+                        <a asp-controller="Randevu" asp-action="Index">📅 Randevu İşlemleri</a>
+                    }
+
+                    @if (canMuayene)
+                    {
+                        <a asp-controller="Muayene" asp-action="Index">🩺 Muayene İşlemleri</a>
+                    }
+
+                    @if (canRecete || canTahlil)
+                    {
+                        <div class="sidebar-section-title">Klinik İşlemler</div>
+                    }
+
+                    @if (canRecete)
+                    {
+                        <a asp-controller="Recete" asp-action="Index">💊 Reçete İşlemleri</a>
+                    }
+
+                    @if (canTahlil)
+                    {
+                        <a asp-controller="Tahlil" asp-action="Index">🧪 Tahlil İşlemleri</a>
+                    }
+
+                    @if (canKullanici || canLog || canRapor)
+                    {
+                        <div class="sidebar-section-title">Yönetim</div>
+                    }
+
+                    @if (canKullanici)
+                    {
+                        <a asp-controller="Kullanici" asp-action="Index">👥 Kullanıcı İşlemleri</a>
+                    }
+
+                    @if (canLog)
+                    {
+                        <a asp-controller="Log" asp-action="Index">📜 Log Kayıtları</a>
+                    }
+
+                    @if (canRapor)
+                    {
+                        <a asp-controller="Rapor" asp-action="Index">📈 Raporlar</a>
+                    }
+                </div>
+
+                <div class="col-md-10 content-area">
+
+                    @if (TempData["Basari"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            @TempData["Basari"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+                        </div>
+                    }
+
+                    @if (TempData["Hata"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            @TempData["Hata"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+                        </div>
+                    }
+
+                    @if (TempData["Bilgi"] != null)
+                    {
+                        <div class="alert alert-info alert-dismissible fade show" role="alert">
+                            @TempData["Bilgi"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+                        </div>
+                    }
+
+                    @RenderBody()
+                </div>
+            }
+            else
+            {
+                <div class="col-md-12">
+                    @RenderBody()
+                </div>
+            }
+        </div>
+    </div>
+    <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                document.querySelectorAll(".only-digits").forEach(function (input) {
+                    input.addEventListener("input", function () {
+                        this.value = this.value.replace(/[^0-9]/g, "");
+                    });
+                });
+            });
+    </script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

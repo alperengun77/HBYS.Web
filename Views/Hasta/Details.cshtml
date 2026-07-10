@@ -1,0 +1,278 @@
+﻿@model HBYS.Web.Models.Hasta
+
+@using HBYS.Web.Models
+
+@{
+    ViewData["Title"] = "Hasta Detay";
+
+    var randevular = ViewBag.Randevular as List<Randevu>;
+    var muayeneler = ViewBag.Muayeneler as List<Muayene>;
+    var receteler = ViewBag.Receteler as List<Recete>;
+    var tahliller = ViewBag.Tahliller as List<Tahlil>;
+}
+<div class="print-header">
+    <h2>HBYS Web</h2>
+    <h4>Hasta Bilgi Kartı</h4>
+    <p>Yazdırma Tarihi: @DateTime.Now.ToString("dd.MM.yyyy HH:mm")</p>
+</div>
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3>Hasta Detay</h3>
+            <p class="text-muted mb-0">Hastaya ait temel bilgiler ve işlem geçmişi.</p>
+        </div>
+
+        <div class="no-print">
+            <button type="button" onclick="window.print()" class="btn btn-main">
+                Yazdır
+            </button>
+
+            <a asp-controller="Hasta" asp-action="Edit" asp-route-id="@Model.HastaId" class="btn btn-warning">
+                Güncelle
+            </a>
+
+            <a asp-controller="Hasta" asp-action="Index" class="btn btn-secondary">
+                Geri Dön
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5>@Model.Ad @Model.Soyad</h5>
+                    <hr />
+
+                    <p><strong>TC Kimlik No:</strong> @Model.TcKimlikNo</p>
+                    <p><strong>Doğum Tarihi:</strong> @Model.DogumTarihi.ToString("dd.MM.yyyy")</p>
+                    <p><strong>Cinsiyet:</strong> @Model.Cinsiyet</p>
+                    <p><strong>Kan Grubu:</strong> @Model.KanGrubu</p>
+                    <p><strong>Telefon:</strong> @Model.Telefon</p>
+                    <p><strong>E-posta:</strong> @Model.Eposta</p>
+                    <p><strong>Kayıt Tarihi:</strong> @Model.KayitTarihi.ToString("dd.MM.yyyy HH:mm")</p>
+                    <p><strong>Adres:</strong> @Model.Adres</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="alert alert-primary">
+                        <strong>Randevu</strong>
+                        <h3>@(randevular?.Count ?? 0)</h3>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="alert alert-success">
+                        <strong>Muayene</strong>
+                        <h3>@(muayeneler?.Count ?? 0)</h3>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="alert alert-warning">
+                        <strong>Reçete</strong>
+                        <h3>@(receteler?.Count ?? 0)</h3>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="alert alert-info">
+                        <strong>Tahlil</strong>
+                        <h3>@(tahliller?.Count ?? 0)</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mt-2">
+                <div class="card-body">
+                    <h5>Hasta Özeti</h5>
+                    <p class="text-muted mb-0">
+                        Bu ekranda hastanın randevu, muayene, reçete ve tahlil geçmişi birlikte görüntülenir.
+                        Böylece hasta takibi tek sayfadan yapılabilir.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-card mt-4">
+    <h5>Randevu Geçmişi</h5>
+    <hr />
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Tarih / Saat</th>
+                    <th>Doktor</th>
+                    <th>Poliklinik</th>
+                    <th>Durum</th>
+                    <th>Açıklama</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (randevular == null || randevular.Count == 0)
+                {
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">Randevu kaydı bulunamadı.</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var randevu in randevular)
+                    {
+                        <tr>
+                            <td>@randevu.RandevuTarihiSaati.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>@randevu.Doktor?.Ad @randevu.Doktor?.Soyad</td>
+                            <td>@randevu.Poliklinik?.PoliklinikAdi</td>
+                            <td>@randevu.Durum</td>
+                            <td>@randevu.Aciklama</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="page-card mt-4">
+    <h5>Muayene Geçmişi</h5>
+    <hr />
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Tarih</th>
+                    <th>Doktor</th>
+                    <th>Şikayet</th>
+                    <th>Tanı</th>
+                    <th>Tedavi Notu</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (muayeneler == null || muayeneler.Count == 0)
+                {
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">Muayene kaydı bulunamadı.</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var muayene in muayeneler)
+                    {
+                        <tr>
+                            <td>@muayene.MuayeneTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>@muayene.Doktor?.Ad @muayene.Doktor?.Soyad</td>
+                            <td>@muayene.Sikayet</td>
+                            <td>@muayene.Tani</td>
+                            <td>@muayene.TedaviNotu</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="page-card mt-4">
+    <h5>Reçete Geçmişi</h5>
+    <hr />
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Kayıt Tarihi</th>
+                    <th>Doktor</th>
+                    <th>İlaç</th>
+                    <th>Doz</th>
+                    <th>Kullanım</th>
+                    <th>Süre</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (receteler == null || receteler.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">Reçete kaydı bulunamadı.</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var recete in receteler)
+                    {
+                        <tr>
+                            <td>@recete.KayitTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>@recete.Muayene?.Doktor?.Ad @recete.Muayene?.Doktor?.Soyad</td>
+                            <td>@recete.IlacAdi</td>
+                            <td>@recete.Doz</td>
+                            <td>@recete.KullanimSekli</td>
+                            <td>@recete.KullanimSuresi</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="page-card mt-4">
+    <h5>Tahlil Geçmişi</h5>
+    <hr />
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>İstenme Tarihi</th>
+                    <th>Doktor</th>
+                    <th>Tahlil</th>
+                    <th>Durum</th>
+                    <th>Sonuç Tarihi</th>
+                    <th>Sonuç</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (tahliller == null || tahliller.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">Tahlil kaydı bulunamadı.</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var tahlil in tahliller)
+                    {
+                        <tr>
+                            <td>@tahlil.IstenmeTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>@tahlil.Muayene?.Doktor?.Ad @tahlil.Muayene?.Doktor?.Soyad</td>
+                            <td>@tahlil.TahlilAdi</td>
+                            <td>@tahlil.Durum</td>
+                            <td>
+                                @if (tahlil.SonucTarihi != null)
+                                {
+                                    @tahlil.SonucTarihi.Value.ToString("dd.MM.yyyy HH:mm")
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Yok</span>
+                                }
+                            </td>
+                            <td>@tahlil.Sonuc</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

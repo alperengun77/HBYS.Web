@@ -1,0 +1,239 @@
+﻿@model List<HBYS.Web.Models.Randevu>
+
+@{
+    ViewData["Title"] = "Randevu İşlemleri";
+
+    bool doktorMu = ViewBag.DoktorMu == true;
+}
+
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3>Randevu İşlemleri</h3>
+            <p class="text-muted mb-0">
+                Randevu kayıtlarını görüntüle, filtrele ve yönet.
+            </p>
+        </div>
+
+        <a asp-controller="Randevu" asp-action="Create" class="btn btn-main">
+            Yeni Randevu Ekle
+        </a>
+    </div>
+
+    <form asp-controller="Randevu" asp-action="Index" method="get" class="row g-2 mb-3">
+        <div class="col-md-2">
+            <input type="text"
+                   name="arama"
+                   value="@ViewBag.Arama"
+                   class="form-control"
+                   placeholder="Hasta / doktor ara" />
+        </div>
+
+        <div class="col-md-2">
+            <input type="date"
+                   name="baslangicTarihi"
+                   value="@ViewBag.BaslangicTarihi"
+                   class="form-control" />
+        </div>
+
+        <div class="col-md-2">
+            <input type="date"
+                   name="bitisTarihi"
+                   value="@ViewBag.BitisTarihi"
+                   class="form-control" />
+        </div>
+
+        <div class="col-md-2">
+            <select name="poliklinikId"
+                    id="poliklinikSelect"
+                    class="form-select">
+                <option value="">Tüm Poliklinikler</option>
+
+                @foreach (var item in ViewBag.Poliklinikler)
+                {
+                    if (item.Value == Convert.ToString(ViewBag.SeciliPoliklinikId))
+                    {
+                        <option value="@item.Value" selected>@item.Text</option>
+                    }
+                    else
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                }
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <select name="doktorId"
+                    id="doktorSelect"
+                    class="form-select"
+                @(doktorMu ? "disabled" : "")>
+                <option value="">Tüm Doktorlar</option>
+
+                @foreach (var item in ViewBag.Doktorlar)
+                {
+                    if (item.Value == Convert.ToString(ViewBag.SeciliDoktorId))
+                    {
+                        <option value="@item.Value" selected>@item.Text</option>
+                    }
+                    else
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                }
+            </select>
+
+            @if (doktorMu && ViewBag.SeciliDoktorId != null)
+            {
+                <input type="hidden" name="doktorId" value="@ViewBag.SeciliDoktorId" />
+            }
+        </div>
+
+        <div class="col-md-1">
+            <select name="durum" class="form-select">
+                <option value="">Durum</option>
+
+                @if (ViewBag.SeciliDurum == "Bekliyor")
+                {
+                    <option value="Bekliyor" selected>Bekliyor</option>
+                }
+                else
+                {
+                    <option value="Bekliyor">Bekliyor</option>
+                }
+
+                @if (ViewBag.SeciliDurum == "Tamamlandi")
+                {
+                    <option value="Tamamlandi" selected>Tamamlandı</option>
+                }
+                else
+                {
+                    <option value="Tamamlandi">Tamamlandı</option>
+                }
+
+                @if (ViewBag.SeciliDurum == "Iptal")
+                {
+                    <option value="Iptal" selected>İptal</option>
+                }
+                else
+                {
+                    <option value="Iptal">İptal</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-1 d-grid">
+            <button type="submit" class="btn btn-primary">
+                Ara
+            </button>
+        </div>
+
+        <div class="col-md-1 d-grid">
+            <a asp-controller="Randevu" asp-action="Index" class="btn btn-secondary">
+                Temizle
+            </a>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Tarih</th>
+                    <th>Hasta</th>
+                    <th>Doktor</th>
+                    <th>Poliklinik</th>
+                    <th>Durum</th>
+                    <th>Açıklama</th>
+                    <th class="text-center">İşlemler</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model == null || Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">
+                            Randevu kaydı bulunamadı.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var randevu in Model)
+                    {
+                        <tr>
+                            <td>@randevu.RandevuTarihiSaati.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>@randevu.Hasta?.Ad @randevu.Hasta?.Soyad</td>
+                            <td>@randevu.Doktor?.Ad @randevu.Doktor?.Soyad</td>
+                            <td>@randevu.Poliklinik?.PoliklinikAdi</td>
+                            <td>@randevu.Durum</td>
+                            <td>@randevu.Aciklama</td>
+                            <td class="text-center">
+                                <a asp-controller="Randevu"
+                                   asp-action="Details"
+                                   asp-route-id="@randevu.RandevuId"
+                                   class="btn btn-sm btn-info">
+                                    Detay
+                                </a>
+
+                                <a asp-controller="Randevu"
+                                   asp-action="Edit"
+                                   asp-route-id="@randevu.RandevuId"
+                                   class="btn btn-sm btn-warning">
+                                    Düzenle
+                                </a>
+
+                                <a asp-controller="Randevu"
+                                   asp-action="Delete"
+                                   asp-route-id="@randevu.RandevuId"
+                                   class="btn btn-sm btn-danger"
+                                   onclick="return confirm('Bu randevu silinsin mi?');">
+                                    Sil
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const poliklinikSelect = document.getElementById("poliklinikSelect");
+        const doktorSelect = document.getElementById("doktorSelect");
+        const seciliDoktorId = "@ViewBag.SeciliDoktorId";
+        const doktorMu = "@doktorMu".toLowerCase() === "true";
+
+        if (!poliklinikSelect || !doktorSelect || doktorMu) {
+            return;
+        }
+
+        poliklinikSelect.addEventListener("change", function () {
+            const poliklinikId = this.value;
+
+            doktorSelect.innerHTML = "";
+            doktorSelect.appendChild(new Option("Tüm Doktorlar", ""));
+
+            if (!poliklinikId) {
+                return;
+            }
+
+            fetch(`/Randevu/DoktorlariGetir?poliklinikId=${poliklinikId}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(function (doktor) {
+                        const option = new Option(doktor.adSoyad, doktor.doktorId);
+
+                        if (doktor.doktorId.toString() === seciliDoktorId) {
+                            option.selected = true;
+                        }
+
+                        doktorSelect.appendChild(option);
+                    });
+                });
+        });
+    });
+</script>

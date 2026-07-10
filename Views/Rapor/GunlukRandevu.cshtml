@@ -1,0 +1,104 @@
+﻿@model List<HBYS.Web.Models.Randevu>
+
+@{
+    ViewData["Title"] = "Günlük Randevu Raporu";
+}
+
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3>Günlük Randevu Raporu</h3>
+            <p class="text-muted mb-0">Seçilen tarihe ait randevuları görüntüle.</p>
+        </div>
+
+        <a asp-controller="Rapor" asp-action="Index" class="btn btn-secondary">
+            Raporlara Dön
+        </a>
+    </div>
+
+    <form asp-controller="Rapor" asp-action="GunlukRandevu" method="get" class="row g-2 mb-4">
+        <div class="col-md-4">
+            <input type="date" name="tarih" value="@ViewBag.SeciliTarih" class="form-control" />
+        </div>
+
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-main w-100">Getir</button>
+        </div>
+    </form>
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-3">
+            <div class="alert alert-primary">
+                <strong>Toplam:</strong> @ViewBag.Toplam
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="alert alert-warning">
+                <strong>Bekleyen:</strong> @ViewBag.Bekleyen
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="alert alert-info">
+                <strong>Geldi:</strong> @ViewBag.Geldi
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="alert alert-success">
+                <strong>Tamamlandı:</strong> @ViewBag.Tamamlandi
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="alert alert-danger">
+                <strong>İptal:</strong> @ViewBag.Iptal
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Saat</th>
+                    <th>Hasta</th>
+                    <th>Doktor</th>
+                    <th>Poliklinik</th>
+                    <th>Durum</th>
+                    <th>Açıklama</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">
+                            Seçilen tarihte randevu bulunamadı.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var randevu in Model)
+                    {
+                        <tr>
+                            <td>@randevu.RandevuTarihiSaati.ToString("HH:mm")</td>
+                            <td>
+                                @randevu.Hasta?.Ad @randevu.Hasta?.Soyad
+                                <br />
+                                <small class="text-muted">@randevu.Hasta?.TcKimlikNo</small>
+                            </td>
+                            <td>@randevu.Doktor?.Ad @randevu.Doktor?.Soyad</td>
+                            <td>@randevu.Poliklinik?.PoliklinikAdi</td>
+                            <td>@randevu.Durum</td>
+                            <td>@randevu.Aciklama</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

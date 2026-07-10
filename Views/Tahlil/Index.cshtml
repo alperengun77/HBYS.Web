@@ -1,0 +1,230 @@
+﻿@model List<HBYS.Web.Models.Tahlil>
+
+@{
+    ViewData["Title"] = "Tahlil İşlemleri";
+}
+
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3>Tahlil İşlemleri</h3>
+            <p class="text-muted mb-0">Tahlil kayıtlarını listele, ara, ekle, güncelle ve sil.</p>
+        </div>
+
+        <a asp-controller="Tahlil" asp-action="Create" class="btn btn-main">
+            Yeni Tahlil Ekle
+        </a>
+    </div>
+
+    @if (TempData["Basari"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Basari"]
+        </div>
+    }
+
+    @if (TempData["Hata"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Hata"]
+        </div>
+    }
+
+    <form asp-controller="Tahlil" asp-action="Index" method="get" class="row g-2 mb-3">
+        <div class="col-md-4">
+            <input type="text"
+                   name="arama"
+                   value="@ViewBag.Arama"
+                   class="form-control"
+                   placeholder="Tahlil adı, hasta, doktor, TC veya sonuç ile ara..." />
+        </div>
+
+        <div class="col-md-2">
+            <input type="date"
+                   name="baslangicTarihi"
+                   value="@ViewBag.BaslangicTarihi"
+                   class="form-control" />
+        </div>
+
+        <div class="col-md-2">
+            <input type="date"
+                   name="bitisTarihi"
+                   value="@ViewBag.BitisTarihi"
+                   class="form-control" />
+        </div>
+
+        <div class="col-md-2">
+            <select name="durum" class="form-select">
+                <option value="">Tüm Durumlar</option>
+
+                @if (ViewBag.Durum == "Istenildi")
+                {
+                    <option value="Istenildi" selected>İstenildi</option>
+                }
+                else
+                {
+                    <option value="Istenildi">İstenildi</option>
+                }
+
+                @if (ViewBag.Durum == "Calisiliyor")
+                {
+                    <option value="Calisiliyor" selected>Çalışılıyor</option>
+                }
+                else
+                {
+                    <option value="Calisiliyor">Çalışılıyor</option>
+                }
+
+                @if (ViewBag.Durum == "Sonuclandi")
+                {
+                    <option value="Sonuclandi" selected>Sonuçlandı</option>
+                }
+                else
+                {
+                    <option value="Sonuclandi">Sonuçlandı</option>
+                }
+
+                @if (ViewBag.Durum == "Iptal")
+                {
+                    <option value="Iptal" selected>İptal</option>
+                }
+                else
+                {
+                    <option value="Iptal">İptal</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-1">
+            <button type="submit" class="btn btn-outline-primary w-100">
+                Filtrele
+            </button>
+        </div>
+
+        <div class="col-md-1">
+            <a asp-controller="Tahlil" asp-action="Index" class="btn btn-outline-secondary w-100">
+                Temizle
+            </a>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>İstenme Tarihi</th>
+                    <th>Hasta</th>
+                    <th>Doktor</th>
+                    <th>Tahlil Adı</th>
+                    <th>Durum</th>
+                    <th>Sonuç Tarihi</th>
+                    <th style="width: 190px;">İşlemler</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">
+                            Kayıtlı tahlil bulunamadı.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var tahlil in Model)
+                    {
+                        <tr>
+                            <td>@tahlil.IstenmeTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+
+                            <td>
+                                @tahlil.Muayene?.Hasta?.Ad @tahlil.Muayene?.Hasta?.Soyad
+                                <br />
+                                <small class="text-muted">@tahlil.Muayene?.Hasta?.TcKimlikNo</small>
+                            </td>
+
+                            <td>
+                                Dr. @tahlil.Muayene?.Doktor?.Ad @tahlil.Muayene?.Doktor?.Soyad
+                            </td>
+
+                            <td>@tahlil.TahlilAdi</td>
+
+                            <td>
+                                @if (tahlil.Durum == "Istenildi")
+                                {
+                                    <span class="badge bg-warning text-dark">İstenildi</span>
+                                }
+                                else if (tahlil.Durum == "Calisiliyor")
+                                {
+                                    <span class="badge bg-info text-dark">Çalışılıyor</span>
+                                }
+                                else if (tahlil.Durum == "Sonuclandi")
+                                {
+                                    <span class="badge bg-success">Sonuçlandı</span>
+                                }
+                                else if (tahlil.Durum == "Iptal")
+                                {
+                                    <span class="badge bg-danger">İptal</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">@tahlil.Durum</span>
+                                }
+                            </td>
+
+                            <td>
+                                @if (tahlil.SonucTarihi != null)
+                                {
+                                    @tahlil.SonucTarihi.Value.ToString("dd.MM.yyyy HH:mm")
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Henüz yok</span>
+                                }
+                            </td>
+
+                            <td>
+                                <a asp-controller="Tahlil"
+                                   asp-action="Details"
+                                   asp-route-id="@tahlil.TahlilId"
+                                   class="btn btn-sm btn-info">
+                                    Detay
+                                </a>
+                                <a asp-controller="Tahlil"
+                                   asp-action="Edit"
+                                   asp-route-id="@tahlil.TahlilId"
+                                   class="btn btn-sm btn-warning">
+                                    Güncelle
+                                </a>
+
+                                <form asp-controller="Tahlil"
+                                      asp-action="Delete"
+                                      asp-route-id="@tahlil.TahlilId"
+                                      method="post"
+                                      class="d-inline"
+                                      onsubmit="return confirm('Bu tahlil kaydını silmek istediğinize emin misiniz?');">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        Sil
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+
+                        @if (!string.IsNullOrWhiteSpace(tahlil.Sonuc))
+                        {
+                            <tr>
+                                <td colspan="7" class="bg-light">
+                                    <strong>Sonuç:</strong> @tahlil.Sonuc
+                                </td>
+                            </tr>
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

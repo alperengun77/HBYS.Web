@@ -1,0 +1,79 @@
+﻿@model HBYS.Web.Models.Tahlil
+
+@{
+    ViewData["Title"] = "Yeni Tahlil Ekle";
+}
+
+<div class="page-card">
+    <div class="mb-3">
+        <h3>Yeni Tahlil Ekle</h3>
+        <p class="text-muted mb-0">Muayeneye bağlı tahlil isteği oluştur.</p>
+    </div>
+
+    <form asp-controller="Tahlil" asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="row g-3">
+            <div class="col-md-12">
+                <label asp-for="MuayeneId" class="form-label">Muayene</label>
+                <select asp-for="MuayeneId" asp-items="ViewBag.Muayeneler" class="form-select">
+                    <option value="">Muayene seçiniz</option>
+                </select>
+                <span asp-validation-for="MuayeneId" class="text-danger"></span>
+                <small class="text-muted">
+                    Tahlil mutlaka bir muayene kaydına bağlı olmalıdır.
+                </small>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="TahlilAdi" class="form-label">Tahlil Adı</label>
+                <input asp-for="TahlilAdi" class="form-control" placeholder="Örn: Tam Kan Sayımı" />
+                <span asp-validation-for="TahlilAdi" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Durum" class="form-label">Durum</label>
+                <select asp-for="Durum" asp-items="ViewBag.Durumlar" class="form-select">
+                    <option value="">Durum seçiniz</option>
+                </select>
+                <span asp-validation-for="Durum" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="IstenmeTarihi" class="form-label">İstenme Tarihi</label>
+                <input asp-for="IstenmeTarihi"
+                       type="datetime-local"
+                       step="60"
+                       class="form-control"
+                       value="@Model.IstenmeTarihi.ToString("yyyy-MM-ddTHH:mm")" />
+                <span asp-validation-for="IstenmeTarihi" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="SonucTarihi" class="form-label">Sonuç Tarihi</label>
+                <input asp-for="SonucTarihi"
+                       type="datetime-local"
+                       step="60"
+                       class="form-control"
+                       value="@(Model.SonucTarihi?.ToString("yyyy-MM-ddTHH:mm"))" />
+                <span asp-validation-for="SonucTarihi" class="text-danger"></span>
+                <small class="text-muted">
+                    Sonuç henüz çıkmadıysa boş bırak.
+                </small>
+            </div>
+
+            <div class="col-md-12">
+                <label asp-for="Sonuc" class="form-label">Sonuç</label>
+                <textarea asp-for="Sonuc" class="form-control" rows="5" placeholder="Tahlil sonucu buraya yazılır..."></textarea>
+                <span asp-validation-for="Sonuc" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-main">Kaydet</button>
+            <a asp-controller="Tahlil" asp-action="Index" class="btn btn-secondary">Geri Dön</a>
+        </div>
+    </form>
+</div>

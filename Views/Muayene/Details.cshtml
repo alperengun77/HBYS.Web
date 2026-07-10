@@ -1,0 +1,205 @@
+﻿@model HBYS.Web.Models.Muayene
+
+@using HBYS.Web.Models
+
+@{
+    ViewData["Title"] = "Muayene Detay";
+
+    var receteler = ViewBag.Receteler as List<Recete>;
+    var tahliller = ViewBag.Tahliller as List<Tahlil>;
+}
+<div class="print-header">
+    <h2>HBYS Web</h2>
+    <h4>Muayene Bilgi Formu</h4>
+    <p>Yazdırma Tarihi: @DateTime.Now.ToString("dd.MM.yyyy HH:mm")</p>
+</div>
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3>Muayene Detay</h3>
+            <p class="text-muted mb-0">Muayeneye ait hasta, doktor, reçete ve tahlil bilgileri.</p>
+        </div>
+
+        <div class="no-print">
+            <button type="button" onclick="window.print()" class="btn btn-main">
+                Yazdır
+            </button>
+
+            <a asp-controller="Muayene" asp-action="Edit" asp-route-id="@Model.MuayeneId" class="btn btn-warning">
+                Güncelle
+            </a>
+
+            <a asp-controller="Muayene" asp-action="Index" class="btn btn-secondary">
+                Geri Dön
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5>Muayene Bilgileri</h5>
+                    <hr />
+
+                    <p><strong>Muayene Tarihi:</strong> @Model.MuayeneTarihi.ToString("dd.MM.yyyy HH:mm")</p>
+                    <p>
+                        <strong>Randevu:</strong>
+                        @if (Model.Randevu != null)
+                        {
+                            @Model.Randevu.RandevuTarihiSaati.ToString("dd.MM.yyyy HH:mm")
+                        }
+                        else
+                        {
+                            <span class="text-muted">Randevusuz</span>
+                        }
+                    </p>
+                    <p><strong>Şikayet:</strong> @Model.Sikayet</p>
+                    <p><strong>Tanı:</strong> @Model.Tani</p>
+                    <p><strong>Tedavi Notu:</strong> @Model.TedaviNotu</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5>Hasta Bilgileri</h5>
+                    <hr />
+
+                    <p><strong>Hasta:</strong> @Model.Hasta?.Ad @Model.Hasta?.Soyad</p>
+                    <p><strong>TC:</strong> @Model.Hasta?.TcKimlikNo</p>
+                    <p><strong>Telefon:</strong> @Model.Hasta?.Telefon</p>
+                    <p><strong>Kan Grubu:</strong> @Model.Hasta?.KanGrubu</p>
+
+                    @if (Model.Hasta != null)
+                    {
+                        <a asp-controller="Hasta"
+                           asp-action="Details"
+                           asp-route-id="@Model.Hasta.HastaId"
+                           class="btn btn-sm btn-info">
+                            Hasta Detayına Git
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5>Doktor Bilgileri</h5>
+                    <hr />
+
+                    <p><strong>Doktor:</strong> @Model.Doktor?.Unvan @Model.Doktor?.Ad @Model.Doktor?.Soyad</p>
+                    <p><strong>Sicil No:</strong> @Model.Doktor?.SicilNo</p>
+                    <p><strong>Telefon:</strong> @Model.Doktor?.Telefon</p>
+                    <p><strong>E-posta:</strong> @Model.Doktor?.Eposta</p>
+
+                    @if (Model.Doktor != null)
+                    {
+                        <a asp-controller="Doktor"
+                           asp-action="Details"
+                           asp-route-id="@Model.Doktor.DoktorId"
+                           class="btn btn-sm btn-info">
+                            Doktor Detayına Git
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-card mt-4">
+    <h5>Reçeteler</h5>
+    <hr />
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Kayıt Tarihi</th>
+                    <th>İlaç</th>
+                    <th>Doz</th>
+                    <th>Kullanım Şekli</th>
+                    <th>Süre</th>
+                    <th>Açıklama</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (receteler == null || receteler.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">Reçete bulunamadı.</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var recete in receteler)
+                    {
+                        <tr>
+                            <td>@recete.KayitTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>@recete.IlacAdi</td>
+                            <td>@recete.Doz</td>
+                            <td>@recete.KullanimSekli</td>
+                            <td>@recete.KullanimSuresi</td>
+                            <td>@recete.Aciklama</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="page-card mt-4">
+    <h5>Tahliller</h5>
+    <hr />
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>İstenme Tarihi</th>
+                    <th>Tahlil</th>
+                    <th>Durum</th>
+                    <th>Sonuç Tarihi</th>
+                    <th>Sonuç</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (tahliller == null || tahliller.Count == 0)
+                {
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">Tahlil bulunamadı.</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var tahlil in tahliller)
+                    {
+                        <tr>
+                            <td>@tahlil.IstenmeTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>@tahlil.TahlilAdi</td>
+                            <td>@tahlil.Durum</td>
+                            <td>
+                                @if (tahlil.SonucTarihi != null)
+                                {
+                                    @tahlil.SonucTarihi.Value.ToString("dd.MM.yyyy HH:mm")
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Yok</span>
+                                }
+                            </td>
+                            <td>@tahlil.Sonuc</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

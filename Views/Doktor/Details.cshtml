@@ -5,32 +5,53 @@
 @{
     ViewData["Title"] = "Doktor Detay";
 
-    var randevular = ViewBag.Randevular as List<Randevu>;
-    var muayeneler = ViewBag.Muayeneler as List<Muayene>;
-    var kullanicilar = ViewBag.Kullanicilar as List<Kullanici>;
+    var randevular =
+        ViewBag.Randevular as List<Randevu>;
+
+    var muayeneler =
+        ViewBag.Muayeneler as List<Muayene>;
+
+    var kullanicilar =
+        ViewBag.Kullanicilar as List<Kullanici>;
 }
+
 <div class="print-header">
     <h2>HBYS Web</h2>
     <h4>Doktor Bilgi Kartı</h4>
-    <p>Yazdırma Tarihi: @DateTime.Now.ToString("dd.MM.yyyy HH:mm")</p>
+
+    <p>
+        Yazdırma Tarihi:
+        @DateTime.Now.ToString("dd.MM.yyyy HH:mm")
+    </p>
 </div>
+
 <div class="page-card">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
             <h3>Doktor Detay</h3>
-            <p class="text-muted mb-0">Doktora ait bilgiler ve işlem geçmişi.</p>
+
+            <p class="text-muted mb-0">
+                Doktora ait bilgiler ve işlem geçmişi.
+            </p>
         </div>
 
         <div class="no-print">
-            <button type="button" onclick="window.print()" class="btn btn-main">
+            <button type="button"
+                    onclick="window.print()"
+                    class="btn btn-main">
                 Yazdır
             </button>
 
-            <a asp-controller="Doktor" asp-action="Edit" asp-route-id="@Model.DoktorId" class="btn btn-warning">
+            <a asp-controller="Doktor"
+               asp-action="Edit"
+               asp-route-id="@Model.DoktorId"
+               class="btn btn-warning">
                 Güncelle
             </a>
 
-            <a asp-controller="Doktor" asp-action="Index" class="btn btn-secondary">
+            <a asp-controller="Doktor"
+               asp-action="Index"
+               class="btn btn-secondary">
                 Geri Dön
             </a>
         </div>
@@ -40,14 +61,38 @@
         <div class="col-md-4">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <h5>@Model.Unvan @Model.Ad @Model.Soyad</h5>
+                    <h5>
+                        @Model.Unvan
+                        @Model.Ad
+                        @Model.Soyad
+                    </h5>
+
                     <hr />
 
-                    <p><strong>Sicil No:</strong> @Model.SicilNo</p>
-                    <p><strong>Poliklinik:</strong> @Model.Poliklinik?.PoliklinikAdi</p>
-                    <p><strong>Telefon:</strong> @Model.Telefon</p>
-                    <p><strong>E-posta:</strong> @Model.Eposta</p>
-                    <p><strong>Kayıt Tarihi:</strong> @Model.KayitTarihi.ToString("dd.MM.yyyy HH:mm")</p>
+                    <p>
+                        <strong>TC Kimlik No:</strong>
+                        @Model.TcKimlikNo
+                    </p>
+
+                    <p>
+                        <strong>Poliklinik:</strong>
+                        @Model.Poliklinik?.PoliklinikAdi
+                    </p>
+
+                    <p>
+                        <strong>Telefon:</strong>
+                        @Model.Telefon
+                    </p>
+
+                    <p>
+                        <strong>E-posta:</strong>
+                        @Model.Eposta
+                    </p>
+
+                    <p>
+                        <strong>Kayıt Tarihi:</strong>
+                        @Model.KayitTarihi.ToString("dd.MM.yyyy HH:mm")
+                    </p>
                 </div>
             </div>
         </div>
@@ -79,8 +124,11 @@
             <div class="card border-0 shadow-sm mt-2">
                 <div class="card-body">
                     <h5>Doktor Özeti</h5>
+
                     <p class="text-muted mb-0">
-                        Bu sayfada doktorun bağlı olduğu poliklinik, randevuları, muayeneleri ve sisteme bağlı kullanıcı hesabı görüntülenir.
+                        Bu sayfada doktorun bağlı olduğu poliklinik,
+                        randevuları, muayeneleri ve sisteme bağlı
+                        kullanıcı hesabı görüntülenir.
                     </p>
                 </div>
             </div>
@@ -104,10 +152,14 @@
             </thead>
 
             <tbody>
-                @if (randevular == null || randevular.Count == 0)
+                @if (randevular == null ||
+                     randevular.Count == 0)
                 {
                     <tr>
-                        <td colspan="4" class="text-center text-muted">Randevu bulunamadı.</td>
+                        <td colspan="4"
+                            class="text-center text-muted">
+                            Randevu bulunamadı.
+                        </td>
                     </tr>
                 }
                 else
@@ -115,10 +167,22 @@
                     foreach (var randevu in randevular)
                     {
                         <tr>
-                            <td>@randevu.RandevuTarihiSaati.ToString("dd.MM.yyyy HH:mm")</td>
-                            <td>@randevu.Hasta?.Ad @randevu.Hasta?.Soyad</td>
-                            <td>@randevu.Poliklinik?.PoliklinikAdi</td>
-                            <td>@randevu.Durum</td>
+                            <td>
+                                @randevu.RandevuTarihiSaati.ToString("dd.MM.yyyy HH:mm")
+                            </td>
+
+                            <td>
+                                @randevu.Hasta?.Ad
+                                @randevu.Hasta?.Soyad
+                            </td>
+
+                            <td>
+                                @randevu.Poliklinik?.PoliklinikAdi
+                            </td>
+
+                            <td>
+                                @randevu.Durum
+                            </td>
                         </tr>
                     }
                 }
@@ -143,10 +207,14 @@
             </thead>
 
             <tbody>
-                @if (muayeneler == null || muayeneler.Count == 0)
+                @if (muayeneler == null ||
+                     muayeneler.Count == 0)
                 {
                     <tr>
-                        <td colspan="4" class="text-center text-muted">Muayene bulunamadı.</td>
+                        <td colspan="4"
+                            class="text-center text-muted">
+                            Muayene bulunamadı.
+                        </td>
                     </tr>
                 }
                 else
@@ -154,10 +222,22 @@
                     foreach (var muayene in muayeneler)
                     {
                         <tr>
-                            <td>@muayene.MuayeneTarihi.ToString("dd.MM.yyyy HH:mm")</td>
-                            <td>@muayene.Hasta?.Ad @muayene.Hasta?.Soyad</td>
-                            <td>@muayene.Sikayet</td>
-                            <td>@muayene.Tani</td>
+                            <td>
+                                @muayene.MuayeneTarihi.ToString("dd.MM.yyyy HH:mm")
+                            </td>
+
+                            <td>
+                                @muayene.Hasta?.Ad
+                                @muayene.Hasta?.Soyad
+                            </td>
+
+                            <td>
+                                @muayene.Sikayet
+                            </td>
+
+                            <td>
+                                @muayene.Tani
+                            </td>
                         </tr>
                     }
                 }
@@ -182,10 +262,14 @@
             </thead>
 
             <tbody>
-                @if (kullanicilar == null || kullanicilar.Count == 0)
+                @if (kullanicilar == null ||
+                     kullanicilar.Count == 0)
                 {
                     <tr>
-                        <td colspan="4" class="text-center text-muted">Bağlı kullanıcı bulunamadı.</td>
+                        <td colspan="4"
+                            class="text-center text-muted">
+                            Bağlı kullanıcı bulunamadı.
+                        </td>
                     </tr>
                 }
                 else
@@ -193,10 +277,21 @@
                     foreach (var kullanici in kullanicilar)
                     {
                         <tr>
-                            <td>@kullanici.KullaniciAdi</td>
-                            <td>@kullanici.AdSoyad</td>
-                            <td>@kullanici.Rol?.RolAdi</td>
-                            <td>@kullanici.Eposta</td>
+                            <td>
+                                @kullanici.KullaniciAdi
+                            </td>
+
+                            <td>
+                                @kullanici.AdSoyad
+                            </td>
+
+                            <td>
+                                @kullanici.Rol?.RolAdi
+                            </td>
+
+                            <td>
+                                @kullanici.Eposta
+                            </td>
                         </tr>
                     }
                 }

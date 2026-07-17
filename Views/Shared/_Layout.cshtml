@@ -1,38 +1,123 @@
 ﻿@using Microsoft.AspNetCore.Http
 
 @{
-    string? adSoyad = Context.Session.GetString("AdSoyad");
-    string? rolAdi = Context.Session.GetString("RolAdi");
+    string? adSoyad =
+        Context.Session.GetString("AdSoyad");
 
-    bool girisVarMi = !string.IsNullOrEmpty(adSoyad);
+    string? rolAdi =
+        Context.Session.GetString("RolAdi");
 
-    bool adminMi = rolAdi == "Admin";
-    bool doktorMu = rolAdi == "Doktor";
-    bool sekreterMi = rolAdi == "Sekreter";
-    bool laborantMi = rolAdi == "Laborant";
-    bool eczaneMi = rolAdi == "Eczane";
-    bool yoneticiMi = rolAdi == "Yonetici";
+    bool girisVarMi =
+        !string.IsNullOrEmpty(adSoyad);
 
-    bool canHasta = adminMi || sekreterMi || doktorMu;
-    bool canDoktor = adminMi || sekreterMi || yoneticiMi;
-    bool canPoliklinik = adminMi || yoneticiMi;
-    bool canRandevu = adminMi || sekreterMi || doktorMu;
-    bool canMuayene = adminMi || doktorMu;
-    bool canRecete = adminMi || doktorMu || eczaneMi;
-    bool canTahlil = adminMi || doktorMu || laborantMi;
-    bool canKullanici = adminMi;
-    bool canLog = adminMi || yoneticiMi;
-    bool canRapor = adminMi || yoneticiMi || sekreterMi || doktorMu;
+    bool adminMi =
+        rolAdi == "Admin";
+
+    bool doktorMu =
+        rolAdi == "Doktor";
+
+    bool sekreterMi =
+        rolAdi == "Sekreter";
+
+    bool hemsireMi =
+        rolAdi == "Hemsire";
+
+    bool laborantMi =
+        rolAdi == "Laborant";
+
+    bool eczaneMi =
+        rolAdi == "Eczane";
+
+    bool yoneticiMi =
+        rolAdi == "Yonetici";
+
+    bool canHasta =
+        adminMi ||
+        sekreterMi ||
+        doktorMu;
+
+    bool canDoktor =
+        adminMi ||
+        sekreterMi ||
+        yoneticiMi;
+
+    bool canPoliklinik =
+        adminMi ||
+        yoneticiMi;
+
+    bool canAcilServis =
+        adminMi ||
+        sekreterMi ||
+        doktorMu;
+
+    bool canRandevu =
+        adminMi ||
+        sekreterMi ||
+        doktorMu;
+
+    bool canMuayene =
+        adminMi ||
+        doktorMu;
+
+    bool canHastaYatis =
+        adminMi ||
+        yoneticiMi ||
+        sekreterMi ||
+        doktorMu ||
+        hemsireMi;
+
+    bool canYatakYonetimi =
+        adminMi ||
+        yoneticiMi ||
+        sekreterMi ||
+        doktorMu ||
+        hemsireMi;
+
+    bool canHemsireGozlem =
+        adminMi ||
+        yoneticiMi ||
+        doktorMu ||
+        hemsireMi;
+
+    bool canRecete =
+        adminMi ||
+        doktorMu ||
+        eczaneMi;
+
+    bool canTahlil =
+        adminMi ||
+        doktorMu ||
+        laborantMi;
+
+    bool canKullanici =
+        adminMi;
+
+    bool canLog =
+        adminMi ||
+        yoneticiMi;
+
+    bool canRapor =
+        adminMi ||
+        yoneticiMi ||
+        sekreterMi ||
+        doktorMu;
 }
 
 <!DOCTYPE html>
+
 <html lang="tr">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - HBYS Web</title>
 
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>
+        @ViewData["Title"] - HBYS Web
+    </title>
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
     <style>
             body {
@@ -71,6 +156,46 @@
                     .sidebar a:hover {
                         background-color: #1f3c88;
                         color: white;
+                    }
+
+                .sidebar .emergency-link {
+                    background-color: #842029;
+                    color: white;
+                    font-weight: bold;
+                }
+
+                    .sidebar .emergency-link:hover {
+                        background-color: #b02a37;
+                    }
+
+                .sidebar .inpatient-link {
+                    background-color: #4c1d95;
+                    color: white;
+                    font-weight: bold;
+                }
+
+                    .sidebar .inpatient-link:hover {
+                        background-color: #6d28d9;
+                    }
+
+                .sidebar .bed-link {
+                    background-color: #164e63;
+                    color: white;
+                    font-weight: bold;
+                }
+
+                    .sidebar .bed-link:hover {
+                        background-color: #0e7490;
+                    }
+
+                .sidebar .nurse-link {
+                    background-color: #166534;
+                    color: white;
+                    font-weight: bold;
+                }
+
+                    .sidebar .nurse-link:hover {
+                        background-color: #15803d;
                     }
 
             .sidebar-section-title {
@@ -114,7 +239,7 @@
             }
 
             .role-badge {
-                background-color: #ffffff;
+                background-color: white;
                 color: #1f3c88;
                 padding: 4px 10px;
                 border-radius: 20px;
@@ -167,7 +292,7 @@
                     display: block;
                     text-align: center;
                     margin-bottom: 20px;
-                    border-bottom: 2px solid #000;
+                    border-bottom: 2px solid black;
                     padding-bottom: 10px;
                 }
 
@@ -182,19 +307,27 @@
             }
     </style>
 </head>
-<body>
 
+<body>
     <div class="topbar d-flex justify-content-between align-items-center">
-        <div>
-            <p class="topbar-title">🏥 HBYS Web</p>
-        </div>
+        <p class="topbar-title">
+            🏥 HBYS Web
+        </p>
 
         <div class="user-info">
             @if (girisVarMi)
             {
                 <span>@adSoyad</span>
-                <span class="role-badge">@rolAdi</span>
-                <a asp-controller="Account" asp-action="Logout" class="btn btn-sm btn-danger ms-3">Çıkış</a>
+
+                <span class="role-badge">
+                    @rolAdi
+                </span>
+
+                <a asp-controller="Account"
+                   asp-action="Logout"
+                   class="btn btn-sm btn-danger ms-3">
+                    Çıkış
+                </a>
             }
         </div>
     </div>
@@ -204,104 +337,220 @@
             @if (girisVarMi)
             {
                 <div class="col-md-2 sidebar">
-                    <div class="sidebar-section-title">Genel</div>
+                    <div class="sidebar-section-title">
+                        Genel
+                    </div>
 
-                    <a asp-controller="Dashboard" asp-action="Index">📊 Dashboard</a>
+                    <a asp-controller="Dashboard"
+                       asp-action="Index">
+                        📊 Dashboard
+                    </a>
 
-                    @if (canHasta || canDoktor || canPoliklinik)
+                    @if (
+                        canHasta ||
+                        canDoktor ||
+                        canPoliklinik
+                    )
                     {
-                        <div class="sidebar-section-title">Kayıt İşlemleri</div>
+                        <div class="sidebar-section-title">
+                            Kayıt İşlemleri
+                        </div>
                     }
 
                     @if (canHasta)
                     {
-                        <a asp-controller="Hasta" asp-action="Index">👤 Hasta İşlemleri</a>
+                        <a asp-controller="Hasta"
+                           asp-action="Index">
+                            👤 Hasta İşlemleri
+                        </a>
                     }
 
                     @if (canDoktor)
                     {
-                        <a asp-controller="Doktor" asp-action="Index">👨‍⚕️ Doktor İşlemleri</a>
+                        <a asp-controller="Doktor"
+                           asp-action="Index">
+                            👨‍⚕️ Doktor İşlemleri
+                        </a>
                     }
 
                     @if (canPoliklinik)
                     {
-                        <a asp-controller="Poliklinik" asp-action="Index">🏥 Poliklinik İşlemleri</a>
+                        <a asp-controller="Poliklinik"
+                           asp-action="Index">
+                            🏥 Poliklinik İşlemleri
+                        </a>
                     }
 
-                    @if (canRandevu || canMuayene)
+                    @if (
+                        canAcilServis ||
+                        canRandevu ||
+                        canMuayene
+                    )
                     {
-                        <div class="sidebar-section-title">Tedavi Süreci</div>
+                        <div class="sidebar-section-title">
+                            Tedavi Süreci
+                        </div>
+                    }
+
+                    @if (canAcilServis)
+                    {
+                        <a asp-controller="AcilServis"
+                           asp-action="Index"
+                           class="emergency-link">
+                            🚑 Acil Servis
+                        </a>
                     }
 
                     @if (canRandevu)
                     {
-                        <a asp-controller="Randevu" asp-action="Index">📅 Randevu İşlemleri</a>
+                        <a asp-controller="Randevu"
+                           asp-action="Index">
+                            📅 Randevu İşlemleri
+                        </a>
                     }
 
                     @if (canMuayene)
                     {
-                        <a asp-controller="Muayene" asp-action="Index">🩺 Muayene İşlemleri</a>
+                        <a asp-controller="Muayene"
+                           asp-action="Index">
+                            🩺 Muayene İşlemleri
+                        </a>
                     }
 
-                    @if (canRecete || canTahlil)
+                    @if (
+                        canHastaYatis ||
+                        canYatakYonetimi ||
+                        canHemsireGozlem
+                    )
                     {
-                        <div class="sidebar-section-title">Klinik İşlemler</div>
+                        <div class="sidebar-section-title">
+                            Yatış ve Servis
+                        </div>
+                    }
+
+                    @if (canHastaYatis)
+                    {
+                        <a asp-controller="HastaYatis"
+                           asp-action="Index"
+                           class="inpatient-link">
+                            🏨 Yatan Hastalar
+                        </a>
+                    }
+
+                    @if (canYatakYonetimi)
+                    {
+                        <a asp-controller="YatakYonetimi"
+                           asp-action="Index"
+                           class="bed-link">
+                            🛏️ Servis ve Yataklar
+                        </a>
+                    }
+
+                    @if (canHemsireGozlem)
+                    {
+                        <a asp-controller="HemsireGozlem"
+                           asp-action="Index"
+                           class="nurse-link">
+                            🩺 Hemşire Gözlemleri
+                        </a>
+                    }
+
+                    @if (
+                        canRecete ||
+                        canTahlil
+                    )
+                    {
+                        <div class="sidebar-section-title">
+                            Klinik İşlemler
+                        </div>
                     }
 
                     @if (canRecete)
                     {
-                        <a asp-controller="Recete" asp-action="Index">💊 Reçete İşlemleri</a>
+                        <a asp-controller="Recete"
+                           asp-action="Index">
+                            💊 Reçete İşlemleri
+                        </a>
                     }
 
                     @if (canTahlil)
                     {
-                        <a asp-controller="Tahlil" asp-action="Index">🧪 Tahlil İşlemleri</a>
+                        <a asp-controller="Tahlil"
+                           asp-action="Index">
+                            🧪 Tahlil İşlemleri
+                        </a>
                     }
 
-                    @if (canKullanici || canLog || canRapor)
+                    @if (
+                        canKullanici ||
+                        canLog ||
+                        canRapor
+                    )
                     {
-                        <div class="sidebar-section-title">Yönetim</div>
+                        <div class="sidebar-section-title">
+                            Yönetim
+                        </div>
                     }
 
                     @if (canKullanici)
                     {
-                        <a asp-controller="Kullanici" asp-action="Index">👥 Kullanıcı İşlemleri</a>
+                        <a asp-controller="Kullanici"
+                           asp-action="Index">
+                            👥 Kullanıcı İşlemleri
+                        </a>
                     }
 
                     @if (canLog)
                     {
-                        <a asp-controller="Log" asp-action="Index">📜 Log Kayıtları</a>
+                        <a asp-controller="Log"
+                           asp-action="Index">
+                            📜 Log Kayıtları
+                        </a>
                     }
 
                     @if (canRapor)
                     {
-                        <a asp-controller="Rapor" asp-action="Index">📈 Raporlar</a>
+                        <a asp-controller="Rapor"
+                           asp-action="Index">
+                            📈 Raporlar
+                        </a>
                     }
                 </div>
 
                 <div class="col-md-10 content-area">
-
                     @if (TempData["Basari"] != null)
                     {
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <div class="alert alert-success alert-dismissible fade show">
                             @TempData["Basari"]
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+
+                            <button type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="alert">
+                            </button>
                         </div>
                     }
 
                     @if (TempData["Hata"] != null)
                     {
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <div class="alert alert-danger alert-dismissible fade show">
                             @TempData["Hata"]
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+
+                            <button type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="alert">
+                            </button>
                         </div>
                     }
 
                     @if (TempData["Bilgi"] != null)
                     {
-                        <div class="alert alert-info alert-dismissible fade show" role="alert">
+                        <div class="alert alert-info alert-dismissible fade show">
                             @TempData["Bilgi"]
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+
+                            <button type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="alert">
+                            </button>
                         </div>
                     }
 
@@ -316,17 +565,35 @@
             }
         </div>
     </div>
-    <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                document.querySelectorAll(".only-digits").forEach(function (input) {
-                    input.addEventListener("input", function () {
-                        this.value = this.value.replace(/[^0-9]/g, "");
-                    });
-                });
-            });
-    </script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
-    @await RenderSectionAsync("Scripts", required: false)
+    <script>
+            document.addEventListener(
+                "DOMContentLoaded",
+                function () {
+                    document
+                        .querySelectorAll(".only-digits")
+                        .forEach(function (input) {
+                            input.addEventListener(
+                                "input",
+                                function () {
+                                    this.value =
+                                        this.value.replace(
+                                            /[^0-9]/g,
+                                            ""
+                                        );
+                                }
+                            );
+                        });
+                }
+            );
+    </script>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js">
+    </script>
+
+    @await RenderSectionAsync(
+        "Scripts",
+        required: false
+    )
 </body>
 </html>

@@ -1,0 +1,312 @@
+﻿@model HBYS.Web.Models.HastaYatis
+
+@{
+    ViewData["Title"] = "Yeni Hasta Yatışı";
+
+    bool doktorMu =
+        ViewBag.DoktorMu == true;
+}
+
+<div class="page-card">
+    <div class="mb-4">
+        <h3>🏨 Yeni Hasta Yatışı</h3>
+
+        <p class="text-muted mb-0">
+            Hastayı, sorumlu doktoru ve boş yatağı seçerek
+            yatış işlemini oluştur.
+        </p>
+    </div>
+
+    <form asp-controller="HastaYatis"
+          asp-action="Create"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-3">
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h5>1. Hasta Seçimi</h5>
+                <hr />
+
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label for="hastaAramaInput"
+                               class="form-label">
+                            Hasta Ara
+                        </label>
+
+                        <input type="text"
+                               id="hastaAramaInput"
+                               class="form-control"
+                               placeholder="TC kimlik no, ad veya soyad yazarak listeyi filtrele..." />
+                    </div>
+
+                    <div class="col-md-12">
+                        <label asp-for="HastaId"
+                               class="form-label">
+                            Hasta
+                        </label>
+
+                        <select asp-for="HastaId"
+                                asp-items="ViewBag.Hastalar"
+                                id="hastaSelect"
+                                class="form-select">
+
+                            <option value="">
+                                Hasta seçiniz
+                            </option>
+                        </select>
+
+                        <span asp-validation-for="HastaId"
+                              class="text-danger">
+                        </span>
+
+                        <small class="text-muted">
+                            Devam eden yatışı bulunan hasta
+                            yeniden yatırılamaz.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h5>2. Doktor ve Yatak</h5>
+                <hr />
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="DoktorId"
+                               class="form-label">
+                            Sorumlu Doktor
+                        </label>
+
+                        @if (doktorMu)
+                        {
+                            <select asp-for="DoktorId"
+                                    asp-items="ViewBag.Doktorlar"
+                                    class="form-select"
+                                    disabled>
+                            </select>
+
+                            <input type="hidden"
+                                   asp-for="DoktorId" />
+                        }
+                        else
+                        {
+                            <select asp-for="DoktorId"
+                                    asp-items="ViewBag.Doktorlar"
+                                    class="form-select">
+
+                                <option value="">
+                                    Doktor seçiniz
+                                </option>
+                            </select>
+                        }
+
+                        <span asp-validation-for="DoktorId"
+                              class="text-danger">
+                        </span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="YatakId"
+                               class="form-label">
+                            Boş Yatak
+                        </label>
+
+                        <select asp-for="YatakId"
+                                asp-items="ViewBag.Yataklar"
+                                class="form-select">
+
+                            <option value="">
+                                Yatak seçiniz
+                            </option>
+                        </select>
+
+                        <span asp-validation-for="YatakId"
+                              class="text-danger">
+                        </span>
+
+                        <small class="text-muted">
+                            Yalnızca boş yataklar listelenir.
+                            Odanın cinsiyet ve yaş kısıtlaması kontrol edilir.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h5>3. Yatış Bilgileri</h5>
+                <hr />
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="YatisTarihi"
+                               class="form-label">
+                            Yatış Tarihi
+                        </label>
+
+                        <input asp-for="YatisTarihi"
+                               type="datetime-local"
+                               step="60"
+                               max="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")"
+                               value="@Model.YatisTarihi.ToString("yyyy-MM-ddTHH:mm")"
+                               class="form-control" />
+
+                        <span asp-validation-for="YatisTarihi"
+                              class="text-danger">
+                        </span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="YatisTuru"
+                               class="form-label">
+                            Yatış Türü
+                        </label>
+
+                        <select asp-for="YatisTuru"
+                                asp-items="ViewBag.YatisTurleri"
+                                class="form-select">
+                        </select>
+
+                        <span asp-validation-for="YatisTuru"
+                              class="text-danger">
+                        </span>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label asp-for="YatisNedeni"
+                               class="form-label">
+                            Yatış Nedeni
+                        </label>
+
+                        <textarea asp-for="YatisNedeni"
+                                  class="form-control"
+                                  rows="4"
+                                  placeholder="Hastanın neden yatırıldığını yazınız...">
+                        </textarea>
+
+                        <span asp-validation-for="YatisNedeni"
+                              class="text-danger">
+                        </span>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label asp-for="OnTani"
+                               class="form-label">
+                            Ön Tanı
+                        </label>
+
+                        <textarea asp-for="OnTani"
+                                  class="form-control"
+                                  rows="3"
+                                  placeholder="Hastanın yatış sırasındaki ön tanısı...">
+                        </textarea>
+
+                        <span asp-validation-for="OnTani"
+                              class="text-danger">
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit"
+                class="btn btn-main">
+            Hastayı Yatır
+        </button>
+
+        <a asp-controller="HastaYatis"
+           asp-action="Index"
+           class="btn btn-secondary">
+            Geri Dön
+        </a>
+    </form>
+</div>
+
+<script>
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+            const aramaInput =
+                document.getElementById(
+                    "hastaAramaInput"
+                );
+
+            const hastaSelect =
+                document.getElementById(
+                    "hastaSelect"
+                );
+
+            const tumSecenekler =
+                Array.from(
+                    hastaSelect.options
+                ).map(option => ({
+                    value: option.value,
+                    text: option.text,
+                    selected: option.selected
+                }));
+
+            aramaInput.addEventListener(
+                "input",
+                function () {
+                    const arama =
+                        this.value
+                            .trim()
+                            .toLocaleLowerCase(
+                                "tr-TR"
+                            );
+
+                    const seciliDeger =
+                        hastaSelect.value;
+
+                    hastaSelect.innerHTML =
+                        "";
+
+                    tumSecenekler.forEach(
+                        function (secenek) {
+                            const metin =
+                                secenek.text
+                                    .toLocaleLowerCase(
+                                        "tr-TR"
+                                    );
+
+                            if (
+                                secenek.value === "" ||
+                                metin.includes(arama)
+                            )
+                            {
+                                const option =
+                                    document.createElement(
+                                        "option"
+                                    );
+
+                                option.value =
+                                    secenek.value;
+
+                                option.textContent =
+                                    secenek.text;
+
+                                option.selected =
+                                    secenek.value ===
+                                    seciliDeger;
+
+                                hastaSelect.appendChild(
+                                    option
+                                );
+                            }
+                        }
+                    );
+                }
+            );
+        }
+    );
+</script>

@@ -7,8 +7,15 @@ namespace HBYS.Web.Models
         public int HastaId { get; set; }
 
         [Required(ErrorMessage = "TC kimlik no boş bırakılamaz.")]
-        [StringLength(11, MinimumLength = 11, ErrorMessage = "TC kimlik no 11 haneli olmalıdır.")]
-        [RegularExpression(@"^[0-9]+$", ErrorMessage = "TC kimlik no sadece rakamlardan oluşmalıdır.")]
+        [StringLength(
+            11,
+            MinimumLength = 11,
+            ErrorMessage = "TC kimlik no 11 haneli olmalıdır."
+        )]
+        [RegularExpression(
+            @"^[0-9]+$",
+            ErrorMessage = "TC kimlik no sadece rakamlardan oluşmalıdır."
+        )]
         public string TcKimlikNo { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Ad boş bırakılamaz.")]
@@ -25,7 +32,10 @@ namespace HBYS.Web.Models
         public string? Cinsiyet { get; set; }
 
         [StringLength(11)]
-        [RegularExpression(@"^[0-9]*$", ErrorMessage = "Telefon sadece rakamlardan oluşmalıdır.")]
+        [RegularExpression(
+            @"^[0-9]*$",
+            ErrorMessage = "Telefon sadece rakamlardan oluşmalıdır."
+        )]
         public string? Telefon { get; set; }
 
         [StringLength(100)]
@@ -41,8 +51,13 @@ namespace HBYS.Web.Models
 
         public DateTime KayitTarihi { get; set; } = DateTime.Now;
 
-        public List<Randevu> Randevular { get; set; } = new List<Randevu>();
+        public List<Randevu> Randevular { get; set; } =
+            new List<Randevu>();
 
-        public List<Muayene> Muayeneler { get; set; } = new List<Muayene>();
+        public List<Muayene> Muayeneler { get; set; } =
+            new List<Muayene>();
+
+        public List<HastaYatis> HastaYatislari { get; set; } =
+            new List<HastaYatis>();
     }
 }

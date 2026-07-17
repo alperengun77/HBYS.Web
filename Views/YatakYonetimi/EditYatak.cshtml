@@ -1,0 +1,125 @@
+﻿@model HBYS.Web.Models.Yatak
+
+@{
+    ViewData["Title"] = "Yatak Güncelle";
+
+    bool yatakDoluMu =
+        ViewBag.YatakDoluMu == true;
+}
+
+<div class="page-card">
+    <h3>Yatak Güncelle</h3>
+
+    <p class="text-muted">
+        Seçili yatağın oda, numara,
+        durum ve özellik bilgilerini güncelle.
+    </p>
+
+    <form asp-controller="YatakYonetimi"
+          asp-action="EditYatak"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+        <input type="hidden"
+               asp-for="YatakId" />
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-3">
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="OdaId"
+                       class="form-label">
+                    Oda
+                </label>
+
+                <select asp-for="OdaId"
+                        asp-items="ViewBag.Odalar"
+                        class="form-select">
+                </select>
+
+                <span asp-validation-for="OdaId"
+                      class="text-danger">
+                </span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="YatakNo"
+                       class="form-label">
+                    Yatak Numarası
+                </label>
+
+                <input asp-for="YatakNo"
+                       class="form-control" />
+
+                <span asp-validation-for="YatakNo"
+                      class="text-danger">
+                </span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Durum"
+                       class="form-label">
+                    Yatak Durumu
+                </label>
+
+                @if (yatakDoluMu)
+                {
+                    <select asp-for="Durum"
+                            asp-items="ViewBag.YatakDurumlari"
+                            class="form-select"
+                            disabled>
+                    </select>
+
+                    <input type="hidden"
+                           asp-for="Durum" />
+                }
+                else
+                {
+                    <select asp-for="Durum"
+                            asp-items="ViewBag.YatakDurumlari"
+                            class="form-select">
+                    </select>
+                }
+
+                <span asp-validation-for="Durum"
+                      class="text-danger">
+                </span>
+
+                <small class="text-muted">
+                    Dolu yatağın durumu hasta taburcu
+                    edilmeden değiştirilemez.
+                </small>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Ozellik"
+                       class="form-label">
+                    Yatak Özelliği
+                </label>
+
+                <input asp-for="Ozellik"
+                       class="form-control" />
+
+                <span asp-validation-for="Ozellik"
+                      class="text-danger">
+                </span>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit"
+                    class="btn btn-main">
+                Güncelle
+            </button>
+
+            <a asp-controller="YatakYonetimi"
+               asp-action="Index"
+               class="btn btn-secondary">
+                Geri Dön
+            </a>
+        </div>
+    </form>
+</div>

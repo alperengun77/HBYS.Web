@@ -1,0 +1,118 @@
+﻿@model HBYS.Web.Models.HastaYatis
+
+@{
+    ViewData["Title"] = "Hastayı Taburcu Et";
+}
+
+<div class="page-card">
+    <div class="mb-4">
+        <h3>✅ Hastayı Taburcu Et</h3>
+
+        <p class="text-muted mb-0">
+            Taburcu işlemi tamamlandığında
+            hastanın yatağı otomatik olarak Temizlikte durumuna geçer.
+        </p>
+    </div>
+
+    <div class="alert alert-warning">
+        <strong>Hasta:</strong>
+        @Model.Hasta?.Ad
+        @Model.Hasta?.Soyad
+
+        <br />
+
+        <strong>TC:</strong>
+        @Model.Hasta?.TcKimlikNo
+
+        <br />
+
+        <strong>Yatak:</strong>
+        @Model.Yatak?.Oda?.Servis?.ServisAdi
+        /
+        Oda @Model.Yatak?.Oda?.OdaNo
+        /
+        Yatak @Model.Yatak?.YatakNo
+
+        <br />
+
+        <strong>Yatış Tarihi:</strong>
+        @Model.YatisTarihi.ToString(
+            "dd.MM.yyyy HH:mm"
+        )
+    </div>
+
+    <form asp-controller="HastaYatis"
+          asp-action="Taburcu"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+        <input type="hidden"
+               name="hastaYatisId"
+               value="@Model.HastaYatisId" />
+
+        <div asp-validation-summary="All"
+             class="text-danger mb-3">
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label for="taburcuTarihi"
+                       class="form-label">
+                    Taburcu Tarihi
+                </label>
+
+                <input type="datetime-local"
+                       id="taburcuTarihi"
+                       name="taburcuTarihi"
+                       step="60"
+                       max="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")"
+                       value="@ViewBag.TaburcuTarihi"
+                       class="form-control" />
+            </div>
+
+            <div class="col-md-12">
+                <label for="taburcuNedeni"
+                       class="form-label">
+                    Taburcu Nedeni
+                </label>
+
+                <textarea id="taburcuNedeni"
+                          name="taburcuNedeni"
+                          class="form-control"
+                          rows="4"
+                          maxlength="500"
+                          placeholder="Hastanın taburcu edilme nedenini yazınız...">@ViewBag.TaburcuNedeni</textarea>
+            </div>
+
+            <div class="col-md-12">
+                <label for="taburcuNotu"
+                       class="form-label">
+                    Taburcu Notu
+                </label>
+
+                <textarea id="taburcuNotu"
+                          name="taburcuNotu"
+                          class="form-control"
+                          rows="5"
+                          maxlength="1000"
+                          placeholder="Kontrol tarihi, öneriler, ilaç kullanımı ve diğer notlar...">@ViewBag.TaburcuNotu</textarea>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit"
+                    class="btn btn-success"
+                    onclick="return confirm('Hasta taburcu edilsin mi?');">
+                Taburcu İşlemini Tamamla
+            </button>
+
+            <a asp-controller="HastaYatis"
+               asp-action="Details"
+               asp-route-id="@Model.HastaYatisId"
+               class="btn btn-secondary">
+                Geri Dön
+            </a>
+        </div>
+    </form>
+</div>

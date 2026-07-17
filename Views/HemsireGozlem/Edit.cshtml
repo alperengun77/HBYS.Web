@@ -1,0 +1,352 @@
+﻿@model HBYS.Web.Models.HemsireGozlem
+
+@{
+    ViewData["Title"] =
+        "Hemşire Gözlemi Güncelle";
+
+    HBYS.Web.Models.HastaYatis? yatis =
+        ViewBag.HastaYatis as
+        HBYS.Web.Models.HastaYatis;
+}
+
+<div class="page-card">
+    <div class="mb-4">
+        <h3>🩺 Hemşire Gözlemini Güncelle</h3>
+
+        <p class="text-muted mb-0">
+            Girilmiş hayati bulguları ve bakım notlarını güncelle.
+        </p>
+    </div>
+
+    <div class="alert alert-info">
+        <strong>Hasta:</strong>
+        @yatis?.Hasta?.Ad
+        @yatis?.Hasta?.Soyad
+
+        <br />
+
+        <strong>TC:</strong>
+        @yatis?.Hasta?.TcKimlikNo
+
+        <br />
+
+        <strong>Konum:</strong>
+        @yatis?.Yatak?.Oda?.Servis?.ServisAdi
+        /
+        Oda @yatis?.Yatak?.Oda?.OdaNo
+        /
+        Yatak @yatis?.Yatak?.YatakNo
+    </div>
+
+    <form asp-controller="HemsireGozlem"
+          asp-action="Edit"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+        <input type="hidden"
+               asp-for="HemsireGozlemId" />
+
+        <input type="hidden"
+               asp-for="HastaYatisId" />
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-3">
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h5>Hayati Bulgular</h5>
+                <hr />
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label asp-for="GozlemTarihi"
+                               class="form-label">
+                            Gözlem Tarihi
+                        </label>
+
+                        <input asp-for="GozlemTarihi"
+                               type="datetime-local"
+                               step="60"
+                               max="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")"
+                               value="@Model.GozlemTarihi.ToString("yyyy-MM-ddTHH:mm")"
+                               class="form-control" />
+
+                        <span asp-validation-for="GozlemTarihi"
+                              class="text-danger">
+                        </span>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label asp-for="Ates"
+                               class="form-label">
+                            Ateş
+                        </label>
+
+                        <input asp-for="Ates"
+                               type="number"
+                               step="0.1"
+                               min="30"
+                               max="45"
+                               class="form-control" />
+
+                        <span asp-validation-for="Ates"
+                              class="text-danger">
+                        </span>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label asp-for="Nabiz"
+                               class="form-label">
+                            Nabız
+                        </label>
+
+                        <input asp-for="Nabiz"
+                               type="number"
+                               min="20"
+                               max="250"
+                               class="form-control" />
+
+                        <span asp-validation-for="Nabiz"
+                              class="text-danger">
+                        </span>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label asp-for="TansiyonSistolik"
+                               class="form-label">
+                            Büyük Tansiyon
+                        </label>
+
+                        <input asp-for="TansiyonSistolik"
+                               type="number"
+                               min="50"
+                               max="250"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-2">
+                        <label asp-for="TansiyonDiastolik"
+                               class="form-label">
+                            Küçük Tansiyon
+                        </label>
+
+                        <input asp-for="TansiyonDiastolik"
+                               type="number"
+                               min="30"
+                               max="180"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label asp-for="OksijenSaturasyonu"
+                               class="form-label">
+                            Oksijen
+                        </label>
+
+                        <input asp-for="OksijenSaturasyonu"
+                               type="number"
+                               min="50"
+                               max="100"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label asp-for="SolunumSayisi"
+                               class="form-label">
+                            Solunum
+                        </label>
+
+                        <input asp-for="SolunumSayisi"
+                               type="number"
+                               min="5"
+                               max="80"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label asp-for="KanSekeri"
+                               class="form-label">
+                            Kan Şekeri
+                        </label>
+
+                        <input asp-for="KanSekeri"
+                               type="number"
+                               min="20"
+                               max="600"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label asp-for="AgriDuzeyi"
+                               class="form-label">
+                            Ağrı Düzeyi
+                        </label>
+
+                        <input asp-for="AgriDuzeyi"
+                               type="number"
+                               min="0"
+                               max="10"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="BilincDurumu"
+                               class="form-label">
+                            Bilinç Durumu
+                        </label>
+
+                        <select asp-for="BilincDurumu"
+                                asp-items="ViewBag.BilincDurumlari"
+                                class="form-select">
+
+                            <option value="">
+                                Seçiniz
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="BeslenmeDurumu"
+                               class="form-label">
+                            Beslenme
+                        </label>
+
+                        <select asp-for="BeslenmeDurumu"
+                                asp-items="ViewBag.BeslenmeDurumlari"
+                                class="form-select">
+
+                            <option value="">
+                                Seçiniz
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="IdrarMiktari"
+                               class="form-label">
+                            İdrar Miktarı
+                        </label>
+
+                        <input asp-for="IdrarMiktari"
+                               type="number"
+                               min="0"
+                               max="10000"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="VerilenIlaclar"
+                               class="form-label">
+                            Verilen İlaçlar
+                        </label>
+
+                        <textarea asp-for="VerilenIlaclar"
+                                  class="form-control"
+                                  rows="4">
+                        </textarea>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="SerumTakibi"
+                               class="form-label">
+                            Serum Takibi
+                        </label>
+
+                        <textarea asp-for="SerumTakibi"
+                                  class="form-control"
+                                  rows="4">
+                        </textarea>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label asp-for="BakimNotu"
+                               class="form-label">
+                            Bakım Notu
+                        </label>
+
+                        <textarea asp-for="BakimNotu"
+                                  class="form-control"
+                                  rows="5">
+                        </textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-danger shadow-sm mb-4">
+            <div class="card-body">
+                <div class="form-check mb-3">
+                    <input asp-for="KritikDurumVarMi"
+                           class="form-check-input"
+                           id="kritikDurumInput" />
+
+                    <label asp-for="KritikDurumVarMi"
+                           class="form-check-label fw-bold text-danger">
+                        Kritik durum bulunmaktadır
+                    </label>
+                </div>
+
+                <div id="kritikNotAlani">
+                    <label asp-for="KritikDurumNotu"
+                           class="form-label">
+                        Kritik Durum Açıklaması
+                    </label>
+
+                    <textarea asp-for="KritikDurumNotu"
+                              class="form-control"
+                              rows="4">
+                    </textarea>
+
+                    <span asp-validation-for="KritikDurumNotu"
+                          class="text-danger">
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit"
+                class="btn btn-warning">
+            Güncelle
+        </button>
+
+        <a asp-controller="HemsireGozlem"
+           asp-action="Details"
+           asp-route-id="@Model.HemsireGozlemId"
+           class="btn btn-secondary">
+            Geri Dön
+        </a>
+    </form>
+</div>
+
+<script>
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+            const kritikInput =
+                document.getElementById(
+                    "kritikDurumInput"
+                );
+
+            const kritikNotAlani =
+                document.getElementById(
+                    "kritikNotAlani"
+                );
+
+            function kritikAlaniGuncelle() {
+                kritikNotAlani.style.display =
+                    kritikInput.checked
+                        ? "block"
+                        : "none";
+            }
+
+            kritikInput.addEventListener(
+                "change",
+                kritikAlaniGuncelle
+            );
+
+            kritikAlaniGuncelle();
+        }
+    );
+</script>

@@ -6,69 +6,234 @@
 
 <div class="page-card">
     <h3>Yeni Reçete Ekle</h3>
+
     <p class="text-muted">
         Muayeneye bağlı ilaç, doz ve kullanım bilgilerini seçerek reçete oluştur.
     </p>
 
-    <form asp-controller="Recete" asp-action="Create" method="post">
+    <div id="kisayolBilgisi"
+         class="alert alert-info d-none">
+        Muayene, kısayoldan otomatik seçildi.
+    </div>
+
+    <form asp-controller="Recete"
+          asp-action="Create"
+          method="post"
+          id="receteForm">
+
         @Html.AntiForgeryToken()
 
-        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-3">
+        </div>
 
         <div class="row">
             <div class="col-md-12 mb-3">
-                <label asp-for="MuayeneId" class="form-label">Muayene</label>
-                <select asp-for="MuayeneId" asp-items="ViewBag.Muayeneler" class="form-select">
-                    <option value="">Muayene seçiniz</option>
+                <label asp-for="MuayeneId"
+                       class="form-label">
+                    Muayene
+                </label>
+
+                <select asp-for="MuayeneId"
+                        asp-items="ViewBag.Muayeneler"
+                        class="form-select"
+                        id="muayeneSelect">
+                    <option value="">
+                        Muayene seçiniz
+                    </option>
                 </select>
-                <span asp-validation-for="MuayeneId" class="text-danger"></span>
+
+                <span asp-validation-for="MuayeneId"
+                      class="text-danger">
+                </span>
             </div>
 
             <div class="col-md-6 mb-3">
-                <label asp-for="IlacAdi" class="form-label">İlaç Adı</label>
-                <select asp-for="IlacAdi" asp-items="ViewBag.Ilaclar" class="form-select">
-                    <option value="">İlaç seçiniz</option>
+                <label asp-for="IlacAdi"
+                       class="form-label">
+                    İlaç Adı
+                </label>
+
+                <select asp-for="IlacAdi"
+                        asp-items="ViewBag.Ilaclar"
+                        class="form-select">
+                    <option value="">
+                        İlaç seçiniz
+                    </option>
                 </select>
-                <span asp-validation-for="IlacAdi" class="text-danger"></span>
+
+                <span asp-validation-for="IlacAdi"
+                      class="text-danger">
+                </span>
             </div>
 
             <div class="col-md-6 mb-3">
-                <label asp-for="Doz" class="form-label">Doz</label>
-                <select asp-for="Doz" asp-items="ViewBag.Dozlar" class="form-select">
-                    <option value="">Doz seçiniz</option>
+                <label asp-for="Doz"
+                       class="form-label">
+                    Doz
+                </label>
+
+                <select asp-for="Doz"
+                        asp-items="ViewBag.Dozlar"
+                        class="form-select">
+                    <option value="">
+                        Doz seçiniz
+                    </option>
                 </select>
-                <span asp-validation-for="Doz" class="text-danger"></span>
+
+                <span asp-validation-for="Doz"
+                      class="text-danger">
+                </span>
             </div>
 
             <div class="col-md-6 mb-3">
-                <label asp-for="KullanimSekli" class="form-label">Kullanım Şekli</label>
-                <select asp-for="KullanimSekli" asp-items="ViewBag.KullanimSekilleri" class="form-select">
-                    <option value="">Kullanım şekli seçiniz</option>
+                <label asp-for="KullanimSekli"
+                       class="form-label">
+                    Kullanım Şekli
+                </label>
+
+                <select asp-for="KullanimSekli"
+                        asp-items="ViewBag.KullanimSekilleri"
+                        class="form-select">
+                    <option value="">
+                        Kullanım şekli seçiniz
+                    </option>
                 </select>
-                <span asp-validation-for="KullanimSekli" class="text-danger"></span>
+
+                <span asp-validation-for="KullanimSekli"
+                      class="text-danger">
+                </span>
             </div>
 
             <div class="col-md-6 mb-3">
-                <label asp-for="KullanimSuresi" class="form-label">Kullanım Süresi</label>
-                <select asp-for="KullanimSuresi" asp-items="ViewBag.KullanimSureleri" class="form-select">
-                    <option value="">Kullanım süresi seçiniz</option>
+                <label asp-for="KullanimSuresi"
+                       class="form-label">
+                    Kullanım Süresi
+                </label>
+
+                <select asp-for="KullanimSuresi"
+                        asp-items="ViewBag.KullanimSureleri"
+                        class="form-select">
+                    <option value="">
+                        Kullanım süresi seçiniz
+                    </option>
                 </select>
-                <span asp-validation-for="KullanimSuresi" class="text-danger"></span>
+
+                <span asp-validation-for="KullanimSuresi"
+                      class="text-danger">
+                </span>
             </div>
 
             <div class="col-md-12 mb-3">
-                <label asp-for="Aciklama" class="form-label">Açıklama</label>
-                <textarea asp-for="Aciklama" class="form-control" rows="3"></textarea>
-                <span asp-validation-for="Aciklama" class="text-danger"></span>
+                <label asp-for="Aciklama"
+                       class="form-label">
+                    Açıklama
+                </label>
+
+                <textarea asp-for="Aciklama"
+                          class="form-control"
+                          rows="3">
+                </textarea>
+
+                <span asp-validation-for="Aciklama"
+                      class="text-danger">
+                </span>
             </div>
         </div>
 
-        <button type="submit" class="btn btn-main">
+        <button type="submit"
+                class="btn btn-main">
             Kaydet
         </button>
 
-        <a asp-controller="Recete" asp-action="Index" class="btn btn-secondary">
+        <a asp-controller="Recete"
+           asp-action="Index"
+           class="btn btn-secondary"
+           id="geriDonButton">
             Geri Dön
         </a>
     </form>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const query =
+            new URLSearchParams(window.location.search);
+
+        const muayeneId =
+            query.get("muayeneId");
+
+        if (!muayeneId) {
+            return;
+        }
+
+        const form =
+            document.getElementById("receteForm");
+
+        const muayeneSelect =
+            document.getElementById("muayeneSelect");
+
+        const kisayolBilgisi =
+            document.getElementById("kisayolBilgisi");
+
+        const geriDonButton =
+            document.getElementById("geriDonButton");
+
+        const secenekVarMi =
+            Array.from(muayeneSelect.options)
+                .some(option =>
+                    option.value === muayeneId
+                );
+
+        if (!secenekVarMi) {
+            kisayolBilgisi.classList.remove(
+                "d-none",
+                "alert-info"
+            );
+
+            kisayolBilgisi.classList.add(
+                "alert-danger"
+            );
+
+            kisayolBilgisi.textContent =
+                "Seçilen muayene bulunamadı veya bu muayene için yetkiniz yok.";
+
+            return;
+        }
+
+        muayeneSelect.value =
+            muayeneId;
+
+        muayeneSelect.disabled =
+            true;
+
+        const hiddenMuayeneId =
+            document.createElement("input");
+
+        hiddenMuayeneId.type =
+            "hidden";
+
+        hiddenMuayeneId.name =
+            "MuayeneId";
+
+        hiddenMuayeneId.value =
+            muayeneId;
+
+        form.appendChild(
+            hiddenMuayeneId
+        );
+
+        kisayolBilgisi.classList.remove(
+            "d-none"
+        );
+
+        const muayeneDetayTemelAdres =
+            '@Url.Action("Details", "Muayene")';
+
+        geriDonButton.href =
+            `${muayeneDetayTemelAdres}/${encodeURIComponent(muayeneId)}`;
+
+        geriDonButton.textContent =
+            "Muayeneye Geri Dön";
+    });
+</script>

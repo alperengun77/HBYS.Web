@@ -1,0 +1,288 @@
+﻿@model HBYS.Web.Models.HastaYatis
+
+@{
+    ViewData["Title"] = "Hasta Yatış Detayı";
+
+    bool taburcuYetkisiVarMi =
+        ViewBag.TaburcuYetkisiVarMi == true;
+
+    bool hastaYatiyorMu =
+        Model.Durum == "Yatıyor";
+}
+
+<div class="print-header">
+    <h2>HBYS Web</h2>
+    <h4>Hasta Yatış Bilgi Formu</h4>
+
+    <p>
+        Yazdırma Tarihi:
+        @DateTime.Now.ToString("dd.MM.yyyy HH:mm")
+    </p>
+</div>
+
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3>🏨 Hasta Yatış Detayı</h3>
+
+            <p class="text-muted mb-0">
+                Yatış No:
+                <strong>@Model.HastaYatisId</strong>
+            </p>
+        </div>
+
+        <div class="d-flex gap-2 no-print">
+            <button type="button"
+                    onclick="window.print()"
+                    class="btn btn-main">
+                Yazdır
+            </button>
+
+            @if (
+                hastaYatiyorMu &&
+                taburcuYetkisiVarMi
+            )
+            {
+                <a asp-controller="HastaYatis"
+                   asp-action="Taburcu"
+                   asp-route-id="@Model.HastaYatisId"
+                   class="btn btn-success">
+                    Hastayı Taburcu Et
+                </a>
+            }
+
+            <a asp-controller="HastaYatis"
+               asp-action="Index"
+               class="btn btn-secondary">
+                Geri Dön
+            </a>
+        </div>
+    </div>
+
+    @if (hastaYatiyorMu)
+    {
+        <div class="alert alert-danger">
+            Hasta şu anda hastanede yatmaktadır.
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-success">
+            Hasta taburcu edilmiştir.
+        </div>
+    }
+
+    <div class="row g-3">
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5>Hasta Bilgileri</h5>
+                    <hr />
+
+                    <p>
+                        <strong>Ad Soyad:</strong>
+                        @Model.Hasta?.Ad
+                        @Model.Hasta?.Soyad
+                    </p>
+
+                    <p>
+                        <strong>TC Kimlik No:</strong>
+                        @Model.Hasta?.TcKimlikNo
+                    </p>
+
+                    <p>
+                        <strong>Doğum Tarihi:</strong>
+                        @Model.Hasta?.DogumTarihi.ToString(
+                            "dd.MM.yyyy"
+                        )
+                    </p>
+
+                    <p>
+                        <strong>Cinsiyet:</strong>
+                        @(Model.Hasta?.Cinsiyet ?? "-")
+                    </p>
+
+                    <p>
+                        <strong>Kan Grubu:</strong>
+                        @(Model.Hasta?.KanGrubu ?? "-")
+                    </p>
+
+                    <p>
+                        <strong>Telefon:</strong>
+                        @(Model.Hasta?.Telefon ?? "-")
+                    </p>
+
+                    @if (Model.Hasta != null)
+                    {
+                        <a asp-controller="Hasta"
+                           asp-action="Details"
+                           asp-route-id="@Model.Hasta.HastaId"
+                           class="btn btn-sm btn-info no-print">
+                            Hasta Detayına Git
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5>Yatak Bilgileri</h5>
+                    <hr />
+
+                    <p>
+                        <strong>Servis:</strong>
+                        @Model.Yatak?.Oda?.Servis?.ServisAdi
+                    </p>
+
+                    <p>
+                        <strong>Kat:</strong>
+                        @(Model.Yatak?.Oda?.Servis?.Kat ?? "-")
+                    </p>
+
+                    <p>
+                        <strong>Oda:</strong>
+                        @Model.Yatak?.Oda?.OdaNo
+                    </p>
+
+                    <p>
+                        <strong>Oda Tipi:</strong>
+                        @Model.Yatak?.Oda?.OdaTipi
+                    </p>
+
+                    <p>
+                        <strong>Yatak:</strong>
+                        @Model.Yatak?.YatakNo
+                    </p>
+
+                    <p>
+                        <strong>Yatak Durumu:</strong>
+                        @Model.Yatak?.Durum
+                    </p>
+
+                    <p>
+                        <strong>Yatak Özelliği:</strong>
+                        @(Model.Yatak?.Ozellik ?? "-")
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5>Sorumlu Doktor</h5>
+                    <hr />
+
+                    <p>
+                        <strong>Doktor:</strong>
+                        @Model.Doktor?.Unvan
+                        @Model.Doktor?.Ad
+                        @Model.Doktor?.Soyad
+                    </p>
+
+                    <p>
+                        <strong>Poliklinik:</strong>
+                        @Model.Doktor?.Poliklinik?.PoliklinikAdi
+                    </p>
+
+                    <p>
+                        <strong>Telefon:</strong>
+                        @(Model.Doktor?.Telefon ?? "-")
+                    </p>
+
+                    <p>
+                        <strong>E-posta:</strong>
+                        @(Model.Doktor?.Eposta ?? "-")
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mt-1">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5>Yatış Bilgileri</h5>
+                    <hr />
+
+                    <p>
+                        <strong>Yatış Tarihi:</strong>
+                        @Model.YatisTarihi.ToString(
+                            "dd.MM.yyyy HH:mm"
+                        )
+                    </p>
+
+                    <p>
+                        <strong>Yatış Türü:</strong>
+                        @Model.YatisTuru
+                    </p>
+
+                    <p>
+                        <strong>Durum:</strong>
+                        @Model.Durum
+                    </p>
+
+                    <p>
+                        <strong>Yatış Nedeni:</strong>
+                    </p>
+
+                    <div class="border rounded p-3 bg-light mb-3">
+                        @Model.YatisNedeni
+                    </div>
+
+                    <p>
+                        <strong>Ön Tanı:</strong>
+                    </p>
+
+                    <div class="border rounded p-3 bg-light">
+                        @(Model.OnTani ?? "Ön tanı girilmedi.")
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5>Taburcu Bilgileri</h5>
+                    <hr />
+
+                    @if (hastaYatiyorMu)
+                    {
+                        <div class="alert alert-warning mb-0">
+                            Hasta henüz taburcu edilmedi.
+                        </div>
+                    }
+                    else
+                    {
+                        <p>
+                            <strong>Taburcu Tarihi:</strong>
+                            @Model.TaburcuTarihi?.ToString(
+                                "dd.MM.yyyy HH:mm"
+                            )
+                        </p>
+
+                        <p>
+                            <strong>Taburcu Nedeni:</strong>
+                        </p>
+
+                        <div class="border rounded p-3 bg-light mb-3">
+                            @(Model.TaburcuNedeni ?? "-")
+                        </div>
+
+                        <p>
+                            <strong>Taburcu Notu:</strong>
+                        </p>
+
+                        <div class="border rounded p-3 bg-light">
+                            @(Model.TaburcuNotu ?? "-")
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

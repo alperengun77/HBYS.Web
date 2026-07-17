@@ -8,28 +8,50 @@
 
 <div class="page-card">
     <h3>Randevu Düzenle</h3>
+
     <p class="text-muted">
         Seçili randevunun bilgilerini güncelle.
     </p>
 
-    <form asp-controller="Randevu" asp-action="Edit" method="post">
+    <form asp-controller="Randevu"
+          asp-action="Edit"
+          method="post">
+
         @Html.AntiForgeryToken()
 
-        <input type="hidden" asp-for="RandevuId" />
+        <input type="hidden"
+               asp-for="RandevuId" />
 
-        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-3">
+        </div>
 
         <div class="row">
             <div class="col-md-6 mb-3">
-                <label asp-for="HastaId" class="form-label">Hasta</label>
-                <select asp-for="HastaId" asp-items="ViewBag.Hastalar" class="form-select">
-                    <option value="">Hasta seçiniz</option>
+                <label asp-for="HastaId"
+                       class="form-label">
+                    Hasta
+                </label>
+
+                <select asp-for="HastaId"
+                        asp-items="ViewBag.Hastalar"
+                        class="form-select">
+
+                    <option value="">
+                        Hasta seçiniz
+                    </option>
                 </select>
-                <span asp-validation-for="HastaId" class="text-danger"></span>
+
+                <span asp-validation-for="HastaId"
+                      class="text-danger">
+                </span>
             </div>
 
             <div class="col-md-6 mb-3">
-                <label asp-for="PoliklinikId" class="form-label">Poliklinik</label>
+                <label asp-for="PoliklinikId"
+                       class="form-label">
+                    Poliklinik
+                </label>
 
                 @if (doktorMu)
                 {
@@ -38,10 +60,14 @@
                             id="poliklinikSelect"
                             class="form-select"
                             disabled>
-                        <option value="">Poliklinik seçiniz</option>
+
+                        <option value="">
+                            Poliklinik seçiniz
+                        </option>
                     </select>
 
-                    <input type="hidden" asp-for="PoliklinikId" />
+                    <input type="hidden"
+                           asp-for="PoliklinikId" />
                 }
                 else
                 {
@@ -49,15 +75,23 @@
                             asp-items="ViewBag.Poliklinikler"
                             id="poliklinikSelect"
                             class="form-select">
-                        <option value="">Poliklinik seçiniz</option>
+
+                        <option value="">
+                            Poliklinik seçiniz
+                        </option>
                     </select>
                 }
 
-                <span asp-validation-for="PoliklinikId" class="text-danger"></span>
+                <span asp-validation-for="PoliklinikId"
+                      class="text-danger">
+                </span>
             </div>
 
             <div class="col-md-6 mb-3">
-                <label asp-for="DoktorId" class="form-label">Doktor</label>
+                <label asp-for="DoktorId"
+                       class="form-label">
+                    Doktor
+                </label>
 
                 @if (doktorMu)
                 {
@@ -66,10 +100,14 @@
                             id="doktorSelect"
                             class="form-select"
                             disabled>
-                        <option value="">Doktor seçiniz</option>
+
+                        <option value="">
+                            Doktor seçiniz
+                        </option>
                     </select>
 
-                    <input type="hidden" asp-for="DoktorId" />
+                    <input type="hidden"
+                           asp-for="DoktorId" />
                 }
                 else
                 {
@@ -77,69 +115,127 @@
                             asp-items="ViewBag.Doktorlar"
                             id="doktorSelect"
                             class="form-select">
-                        <option value="">Doktor seçiniz</option>
+
+                        <option value="">
+                            Doktor seçiniz
+                        </option>
                     </select>
                 }
 
-                <span asp-validation-for="DoktorId" class="text-danger"></span>
+                <span asp-validation-for="DoktorId"
+                      class="text-danger">
+                </span>
             </div>
 
             <div class="col-md-3 mb-3">
-                <label class="form-label">Randevu Tarihi</label>
+                <label for="randevuTarihiInput"
+                       class="form-label">
+                    Randevu Tarihi
+                </label>
+
                 <input type="date"
+                       id="randevuTarihiInput"
                        name="randevuTarihi"
                        value="@ViewBag.RandevuTarihi"
                        class="form-control" />
             </div>
 
             <div class="col-md-3 mb-3">
-                <label class="form-label">Randevu Saati</label>
-                <select name="randevuSaati" class="form-select">
-                    <option value="">Saat seçiniz</option>
+                <label for="randevuSaatiSelect"
+                       class="form-label">
+                    Randevu Saati
+                </label>
+
+                <select id="randevuSaatiSelect"
+                        name="randevuSaati"
+                        class="form-select">
+
+                    <option value="">
+                        Boş saat seçiniz
+                    </option>
 
                     @foreach (string saat in ViewBag.Saatler)
                     {
                         if (ViewBag.RandevuSaati == saat)
                         {
-                            <option value="@saat" selected>@saat</option>
+                            <option value="@saat"
+                                    selected>
+                                @saat
+                            </option>
                         }
                         else
                         {
-                            <option value="@saat">@saat</option>
+                            <option value="@saat">
+                                @saat
+                            </option>
                         }
                     }
                 </select>
             </div>
 
             <div class="col-md-6 mb-3">
-                <span asp-validation-for="RandevuTarihiSaati" class="text-danger"></span>
-                <small class="text-muted d-block">
-                    Randevu saatleri sadece 15 dakikalık aralıklarla seçilebilir.
+                <span asp-validation-for="RandevuTarihiSaati"
+                      class="text-danger">
+                </span>
+
+                <small id="saatBilgisi"
+                       class="text-muted d-block">
+                    Doktor veya tarih değiştirildiğinde boş saatler yeniden hesaplanır.
                 </small>
             </div>
 
             <div class="col-md-6 mb-3">
-                <label asp-for="Durum" class="form-label">Durum</label>
-                <select asp-for="Durum" class="form-select">
-                    <option value="Bekliyor">Bekliyor</option>
-                    <option value="Tamamlandi">Tamamlandı</option>
-                    <option value="Iptal">İptal</option>
+                <label asp-for="Durum"
+                       class="form-label">
+                    Durum
+                </label>
+
+                <select asp-for="Durum"
+                        class="form-select">
+
+                    <option value="Bekliyor">
+                        Bekliyor
+                    </option>
+
+                    <option value="Tamamlandi">
+                        Tamamlandı
+                    </option>
+
+                    <option value="Iptal">
+                        İptal
+                    </option>
                 </select>
-                <span asp-validation-for="Durum" class="text-danger"></span>
+
+                <span asp-validation-for="Durum"
+                      class="text-danger">
+                </span>
             </div>
 
             <div class="col-md-12 mb-3">
-                <label asp-for="Aciklama" class="form-label">Açıklama</label>
-                <textarea asp-for="Aciklama" class="form-control" rows="3"></textarea>
-                <span asp-validation-for="Aciklama" class="text-danger"></span>
+                <label asp-for="Aciklama"
+                       class="form-label">
+                    Açıklama
+                </label>
+
+                <textarea asp-for="Aciklama"
+                          class="form-control"
+                          rows="3">
+                </textarea>
+
+                <span asp-validation-for="Aciklama"
+                      class="text-danger">
+                </span>
             </div>
         </div>
 
-        <button type="submit" class="btn btn-main">
+        <button type="submit"
+                class="btn btn-main">
             Güncelle
         </button>
 
-        <a asp-controller="Randevu" asp-action="Index" class="btn btn-secondary">
+        <a asp-controller="Randevu"
+           asp-action="Index"
+           class="btn btn-secondary">
             Geri Dön
         </a>
     </form>
@@ -147,38 +243,188 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const poliklinikSelect = document.getElementById("poliklinikSelect");
-        const doktorSelect = document.getElementById("doktorSelect");
-        const seciliDoktorId = "@Model.DoktorId";
-        const doktorMu = "@doktorMu".toLowerCase() === "true";
+        const poliklinikSelect =
+            document.getElementById("poliklinikSelect");
 
-        if (!poliklinikSelect || !doktorSelect || doktorMu) {
-            return;
+        const doktorSelect =
+            document.getElementById("doktorSelect");
+
+        const tarihInput =
+            document.getElementById("randevuTarihiInput");
+
+        const saatSelect =
+            document.getElementById("randevuSaatiSelect");
+
+        const saatBilgisi =
+            document.getElementById("saatBilgisi");
+
+        const doktorMu =
+            "@doktorMu".toLowerCase() === "true";
+
+        const randevuId =
+            "@Model.RandevuId";
+
+        const doktorGetirUrl =
+            '@Url.Action("DoktorlariGetir", "Randevu")';
+
+        const bosSaatGetirUrl =
+            '@Url.Action("BosSaatleriGetir", "Randevu")';
+
+        function saatleriTemizle(mesaj) {
+            saatSelect.innerHTML = "";
+
+            saatSelect.appendChild(
+                new Option(mesaj, "")
+            );
         }
 
-        poliklinikSelect.addEventListener("change", function () {
-            const poliklinikId = this.value;
+        function bosSaatleriYukle() {
+            const doktorId =
+                doktorSelect
+                    ? doktorSelect.value
+                    : "";
 
-            doktorSelect.innerHTML = "";
-            doktorSelect.appendChild(new Option("Doktor seçiniz", ""));
+            const tarih =
+                tarihInput
+                    ? tarihInput.value
+                    : "";
 
-            if (!poliklinikId) {
+            if (!doktorId || !tarih) {
+                saatleriTemizle(
+                    "Önce doktor ve tarih seçiniz"
+                );
+
+                saatBilgisi.textContent =
+                    "Doktor ve tarih seçildiğinde yalnızca boş randevu saatleri gösterilir.";
+
                 return;
             }
 
-            fetch(`/Randevu/DoktorlariGetir?poliklinikId=${poliklinikId}`)
-                .then(response => response.json())
-                .then(data => {
-                    data.forEach(function (doktor) {
-                        const option = new Option(doktor.adSoyad, doktor.doktorId);
+            saatleriTemizle(
+                "Boş saatler yükleniyor..."
+            );
 
-                        if (doktor.doktorId.toString() === seciliDoktorId) {
-                            option.selected = true;
-                        }
+            fetch(
+                `${bosSaatGetirUrl}?doktorId=${encodeURIComponent(doktorId)}&randevuTarihi=${encodeURIComponent(tarih)}&haricRandevuId=${encodeURIComponent(randevuId)}`
+            )
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(
+                            "Saatler alınamadı."
+                        );
+                    }
 
-                        doktorSelect.appendChild(option);
+                    return response.json();
+                })
+                .then(saatler => {
+                    saatSelect.innerHTML = "";
+
+                    if (
+                        !saatler ||
+                        saatler.length === 0
+                    ) {
+                        saatSelect.appendChild(
+                            new Option(
+                                "Bu gün için boş saat yok",
+                                ""
+                            )
+                        );
+
+                        saatBilgisi.textContent =
+                            "Seçilen doktorun bu tarihte kullanılabilir randevu saati bulunmuyor.";
+
+                        return;
+                    }
+
+                    saatSelect.appendChild(
+                        new Option(
+                            "Boş saat seçiniz",
+                            ""
+                        )
+                    );
+
+                    saatler.forEach(function (saat) {
+                        saatSelect.appendChild(
+                            new Option(saat, saat)
+                        );
                     });
+
+                    saatBilgisi.textContent =
+                        "Dolu ve geçmiş saatler listeden çıkarıldı.";
+                })
+                .catch(() => {
+                    saatleriTemizle(
+                        "Saatler yüklenemedi"
+                    );
+
+                    saatBilgisi.textContent =
+                        "Boş saatler yüklenirken bir hata oluştu.";
                 });
-        });
+        }
+
+        if (
+            poliklinikSelect &&
+            doktorSelect &&
+            !doktorMu
+        ) {
+            poliklinikSelect.addEventListener(
+                "change",
+                function () {
+                    const poliklinikId =
+                        this.value;
+
+                    doktorSelect.innerHTML = "";
+
+                    doktorSelect.appendChild(
+                        new Option(
+                            "Doktor seçiniz",
+                            ""
+                        )
+                    );
+
+                    saatleriTemizle(
+                        "Önce doktor seçiniz"
+                    );
+
+                    if (!poliklinikId) {
+                        return;
+                    }
+
+                    fetch(
+                        `${doktorGetirUrl}?poliklinikId=${encodeURIComponent(poliklinikId)}`
+                    )
+                        .then(response =>
+                            response.json()
+                        )
+                        .then(doktorlar => {
+                            doktorlar.forEach(
+                                function (doktor) {
+                                    doktorSelect
+                                        .appendChild(
+                                            new Option(
+                                                doktor.adSoyad,
+                                                doktor.doktorId
+                                            )
+                                        );
+                                }
+                            );
+                        });
+                }
+            );
+        }
+
+        if (doktorSelect) {
+            doktorSelect.addEventListener(
+                "change",
+                bosSaatleriYukle
+            );
+        }
+
+        if (tarihInput) {
+            tarihInput.addEventListener(
+                "change",
+                bosSaatleriYukle
+            );
+        }
     });
 </script>

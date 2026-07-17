@@ -1,0 +1,486 @@
+﻿@model List<HBYS.Web.Models.Servis>
+
+@{
+    ViewData["Title"] =
+        "Servis ve Yatak Yönetimi";
+
+    bool yonetimYetkisiVarMi =
+        ViewBag.YonetimYetkisiVarMi == true;
+
+    bool yatisIslemiYetkisiVarMi =
+        ViewBag.YatisIslemiYetkisiVarMi == true;
+}
+
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3>🛏️ Servis, Oda ve Yatak Yönetimi</h3>
+
+            <p class="text-muted mb-0">
+                Yatak durumlarını ve yataklarda kalan
+                hastaların bilgilerini görüntüle.
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a asp-controller="HastaYatis"
+               asp-action="Index"
+               class="btn btn-danger">
+                Yatan Hastalar
+            </a>
+
+            @if (yatisIslemiYetkisiVarMi)
+            {
+                <a asp-controller="HastaYatis"
+                   asp-action="Create"
+                   class="btn btn-success">
+                    Hasta Yatır
+                </a>
+            }
+
+            @if (yonetimYetkisiVarMi)
+            {
+                <a asp-controller="YatakYonetimi"
+                   asp-action="CreateServis"
+                   class="btn btn-main">
+                    Yeni Servis
+                </a>
+
+                <a asp-controller="YatakYonetimi"
+                   asp-action="CreateOda"
+                   class="btn btn-outline-primary">
+                    Yeni Oda
+                </a>
+
+                <a asp-controller="YatakYonetimi"
+                   asp-action="CreateYatak"
+                   class="btn btn-outline-success">
+                    Yeni Yatak
+                </a>
+            }
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-2">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted">Servis</div>
+                    <h2 class="mb-0">@ViewBag.ToplamServis</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted">Oda</div>
+                    <h2 class="mb-0">@ViewBag.ToplamOda</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted">Toplam Yatak</div>
+                    <h2 class="mb-0">@ViewBag.ToplamYatak</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted">Boş Yatak</div>
+                    <h2 class="text-success mb-0">@ViewBag.BosYatak</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted">Dolu Yatak</div>
+                    <h2 class="text-danger mb-0">@ViewBag.DoluYatak</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted">Doluluk</div>
+                    <h2 class="mb-0">%@ViewBag.DolulukOrani</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form asp-controller="YatakYonetimi"
+          asp-action="Index"
+          method="get"
+          class="row g-2 mb-4">
+
+        <div class="col-md-5">
+            <input type="text"
+                   name="arama"
+                   value="@ViewBag.Arama"
+                   class="form-control"
+                   placeholder="Servis, oda, yatak, hasta veya TC ara..." />
+        </div>
+
+        <div class="col-md-4">
+            <select name="servisId"
+                    asp-items="ViewBag.ServisFiltreListesi"
+                    class="form-select">
+
+                <option value="">
+                    Tüm Servisler
+                </option>
+            </select>
+        </div>
+
+        <div class="col-md-1">
+            <button type="submit"
+                    class="btn btn-main w-100">
+                Ara
+            </button>
+        </div>
+
+        <div class="col-md-2">
+            <a asp-controller="YatakYonetimi"
+               asp-action="Index"
+               class="btn btn-outline-secondary w-100">
+                Temizle
+            </a>
+        </div>
+    </form>
+
+    @if (Model.Count == 0)
+    {
+        <div class="alert alert-info mb-0">
+            Görüntülenecek aktif servis bulunamadı.
+        </div>
+    }
+    else
+    {
+        foreach (var servis in Model)
+        {
+            var aktifOdalar =
+                servis.Odalar
+                    .Where(o => o.AktifMi)
+                    .OrderBy(o => o.OdaNo)
+                    .ToList();
+
+            int servisToplamYatak =
+                aktifOdalar
+                    .SelectMany(o => o.Yataklar)
+                    .Count(y => y.AktifMi);
+
+            int servisBosYatak =
+                aktifOdalar
+                    .SelectMany(o => o.Yataklar)
+                    .Count(y =>
+                        y.AktifMi &&
+                        y.Durum == "Boş"
+                    );
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1">
+                                @servis.ServisAdi
+                            </h5>
+
+                            <span class="text-muted">
+                                @(servis.Kat ?? "Kat bilgisi yok")
+                                · @aktifOdalar.Count oda
+                                · @servisToplamYatak yatak
+                                · @servisBosYatak boş
+                            </span>
+                        </div>
+
+                        @if (yonetimYetkisiVarMi)
+                        {
+                            <div class="d-flex gap-2">
+                                <a asp-controller="YatakYonetimi"
+                                   asp-action="CreateOda"
+                                   asp-route-servisId="@servis.ServisId"
+                                   class="btn btn-sm btn-outline-primary">
+                                    Oda Ekle
+                                </a>
+
+                                <a asp-controller="YatakYonetimi"
+                                   asp-action="EditServis"
+                                   asp-route-id="@servis.ServisId"
+                                   class="btn btn-sm btn-warning">
+                                    Servisi Düzenle
+                                </a>
+
+                                <form asp-controller="YatakYonetimi"
+                                      asp-action="DeleteServis"
+                                      asp-route-id="@servis.ServisId"
+                                      method="post"
+                                      onsubmit="return confirm('Bu servis silinsin mi?');">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <button type="submit"
+                                            class="btn btn-sm btn-danger">
+                                        Servisi Sil
+                                    </button>
+                                </form>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    @if (aktifOdalar.Count == 0)
+                    {
+                        <div class="text-muted">
+                            Bu serviste aktif oda bulunmuyor.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Oda</th>
+                                        <th>Tip</th>
+                                        <th>Kısıtlama</th>
+                                        <th>Yatak ve Hasta Bilgileri</th>
+                                        <th style="width:260px;">
+                                            İşlemler
+                                        </th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @foreach (var oda in aktifOdalar)
+                                    {
+                                        var aktifYataklar =
+                                            oda.Yataklar
+                                                .Where(y => y.AktifMi)
+                                                .OrderBy(y => y.YatakNo)
+                                                .ToList();
+
+                                        <tr>
+                                            <td>
+                                                <strong>
+                                                    Oda @oda.OdaNo
+                                                </strong>
+
+                                                @if (
+                                                    !string.IsNullOrWhiteSpace(
+                                                        oda.Aciklama
+                                                    )
+                                                )
+                                                {
+                                                    <br />
+
+                                                    <small class="text-muted">
+                                                        @oda.Aciklama
+                                                    </small>
+                                                }
+                                            </td>
+
+                                            <td>@oda.OdaTipi</td>
+
+                                            <td>@oda.CinsiyetKisitlamasi</td>
+
+                                            <td>
+                                                @if (aktifYataklar.Count == 0)
+                                                {
+                                                    <span class="text-muted">
+                                                        Yatak yok
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <div class="row g-2">
+                                                        @foreach (var yatak in aktifYataklar)
+                                                        {
+                                                            var aktifYatis =
+                                                                yatak.HastaYatislari
+                                                                    .FirstOrDefault(y =>
+                                                                        y.AktifMi &&
+                                                                        y.Durum == "Yatıyor"
+                                                                    );
+
+                                                            string durumSinifi =
+                                                                yatak.Durum switch
+                                                                {
+                                                                    "Boş" =>
+                                                                        "border-success",
+
+                                                                    "Dolu" =>
+                                                                        "border-danger",
+
+                                                                    "Temizlikte" =>
+                                                                        "border-warning",
+
+                                                                    "Bakımda" =>
+                                                                        "border-dark",
+
+                                                                    "Rezerve" =>
+                                                                        "border-info",
+
+                                                                    _ =>
+                                                                        "border-secondary"
+                                                                };
+
+                                                            string badgeSinifi =
+                                                                yatak.Durum switch
+                                                                {
+                                                                    "Boş" =>
+                                                                        "bg-success",
+
+                                                                    "Dolu" =>
+                                                                        "bg-danger",
+
+                                                                    "Temizlikte" =>
+                                                                        "bg-warning text-dark",
+
+                                                                    "Bakımda" =>
+                                                                        "bg-dark",
+
+                                                                    "Rezerve" =>
+                                                                        "bg-info text-dark",
+
+                                                                    _ =>
+                                                                        "bg-secondary"
+                                                                };
+
+                                                            <div class="col-lg-6">
+                                                                <div class="card @durumSinifi h-100">
+                                                                    <div class="card-body p-3">
+                                                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                                                            <strong>
+                                                                                Yatak @yatak.YatakNo
+                                                                            </strong>
+
+                                                                            <span class="badge @badgeSinifi">
+                                                                                @yatak.Durum
+                                                                            </span>
+                                                                        </div>
+
+                                                                        @if (aktifYatis != null)
+                                                                        {
+                                                                            <div class="bg-light border rounded p-2 mb-2">
+                                                                                <strong class="text-danger">
+                                                                                    @aktifYatis.Hasta?.Ad
+                                                                                    @aktifYatis.Hasta?.Soyad
+                                                                                </strong>
+
+                                                                                <br />
+
+                                                                                <small>
+                                                                                    TC:
+                                                                                    @aktifYatis.Hasta?.TcKimlikNo
+                                                                                </small>
+
+                                                                                <br />
+
+                                                                                <small>
+                                                                                    Yatış:
+                                                                                    @aktifYatis.YatisTarihi.ToString(
+                                                                                        "dd.MM.yyyy HH:mm"
+                                                                                    )
+                                                                                </small>
+                                                                            </div>
+
+                                                                            <a asp-controller="HastaYatis"
+                                                                               asp-action="Details"
+                                                                               asp-route-id="@aktifYatis.HastaYatisId"
+                                                                               class="btn btn-sm btn-info">
+                                                                                Yatış Detayı
+                                                                            </a>
+                                                                        }
+                                                                        else if (
+                                                                            yatak.Durum == "Boş" &&
+                                                                            yatisIslemiYetkisiVarMi
+                                                                        )
+                                                                        {
+                                                                            <a asp-controller="HastaYatis"
+                                                                               asp-action="Create"
+                                                                               asp-route-yatakId="@yatak.YatakId"
+                                                                               class="btn btn-sm btn-success">
+                                                                                Bu Yatağa Hasta Yatır
+                                                                            </a>
+                                                                        }
+
+                                                                        @if (
+                                                                            yonetimYetkisiVarMi &&
+                                                                            aktifYatis == null
+                                                                        )
+                                                                        {
+                                                                            <a asp-controller="YatakYonetimi"
+                                                                               asp-action="EditYatak"
+                                                                               asp-route-id="@yatak.YatakId"
+                                                                               class="btn btn-sm btn-outline-secondary">
+                                                                                Yatağı Düzenle
+                                                                            </a>
+                                                                        }
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                }
+                                            </td>
+
+                                            <td>
+                                                @if (yonetimYetkisiVarMi)
+                                                {
+                                                    <a asp-controller="YatakYonetimi"
+                                                       asp-action="CreateYatak"
+                                                       asp-route-odaId="@oda.OdaId"
+                                                       class="btn btn-sm btn-success mb-1">
+                                                        Yatak Ekle
+                                                    </a>
+
+                                                    <a asp-controller="YatakYonetimi"
+                                                       asp-action="EditOda"
+                                                       asp-route-id="@oda.OdaId"
+                                                       class="btn btn-sm btn-warning mb-1">
+                                                        Odayı Düzenle
+                                                    </a>
+
+                                                    <form asp-controller="YatakYonetimi"
+                                                          asp-action="DeleteOda"
+                                                          asp-route-id="@oda.OdaId"
+                                                          method="post"
+                                                          class="d-inline"
+                                                          onsubmit="return confirm('Bu oda silinsin mi?');">
+
+                                                        @Html.AntiForgeryToken()
+
+                                                        <button type="submit"
+                                                                class="btn btn-sm btn-danger mb-1">
+                                                            Odayı Sil
+                                                        </button>
+                                                    </form>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">
+                                                        Görüntüleme yetkisi
+                                                    </span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>

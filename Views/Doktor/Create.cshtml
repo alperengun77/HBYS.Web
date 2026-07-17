@@ -7,67 +7,145 @@
 <div class="page-card">
     <div class="mb-3">
         <h3>Yeni Doktor Ekle</h3>
-        <p class="text-muted mb-0">Yeni doktor kaydı oluştur.</p>
+        <p class="text-muted mb-0">
+            Yeni doktor kaydı oluştur.
+        </p>
     </div>
 
-    <form asp-controller="Doktor" asp-action="Create" method="post">
+    <form asp-controller="Doktor"
+          asp-action="Create"
+          method="post">
+
         @Html.AntiForgeryToken()
 
-        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-3">
+        </div>
 
         <div class="row g-3">
             <div class="col-md-4">
-                <label asp-for="SicilNo" class="form-label">Sicil No</label>
-                <input asp-for="SicilNo" class="form-control" />
-                <span asp-validation-for="SicilNo" class="text-danger"></span>
+                <label asp-for="TcKimlikNo"
+                       class="form-label">
+                    TC Kimlik No
+                </label>
+
+                <input asp-for="TcKimlikNo"
+                       class="form-control only-digits"
+                       maxlength="11"
+                       inputmode="numeric"
+                       placeholder="11 haneli TC kimlik no" />
+
+                <span asp-validation-for="TcKimlikNo"
+                      class="text-danger">
+                </span>
             </div>
 
             <div class="col-md-4">
-                <label asp-for="Ad" class="form-label">Ad</label>
-                <input asp-for="Ad" class="form-control" />
-                <span asp-validation-for="Ad" class="text-danger"></span>
+                <label asp-for="Ad"
+                       class="form-label">
+                    Ad
+                </label>
+
+                <input asp-for="Ad"
+                       class="form-control" />
+
+                <span asp-validation-for="Ad"
+                      class="text-danger">
+                </span>
             </div>
 
             <div class="col-md-4">
-                <label asp-for="Soyad" class="form-label">Soyad</label>
-                <input asp-for="Soyad" class="form-control" />
-                <span asp-validation-for="Soyad" class="text-danger"></span>
+                <label asp-for="Soyad"
+                       class="form-label">
+                    Soyad
+                </label>
+
+                <input asp-for="Soyad"
+                       class="form-control" />
+
+                <span asp-validation-for="Soyad"
+                      class="text-danger">
+                </span>
             </div>
 
             <div class="col-md-4">
-                <label asp-for="Unvan" class="form-label">Unvan</label>
-                <input asp-for="Unvan" class="form-control" placeholder="Örn: Uzman Doktor" />
-                <span asp-validation-for="Unvan" class="text-danger"></span>
+                <label asp-for="Unvan"
+                       class="form-label">
+                    Unvan
+                </label>
+
+                <input asp-for="Unvan"
+                       class="form-control"
+                       placeholder="Örn: Uzman Doktor" />
+
+                <span asp-validation-for="Unvan"
+                      class="text-danger">
+                </span>
             </div>
 
             <div class="col-md-4">
-                <label asp-for="PoliklinikId" class="form-label">Poliklinik</label>
-                <select asp-for="PoliklinikId" asp-items="ViewBag.Poliklinikler" class="form-select">
-                    <option value="">Poliklinik seçiniz</option>
+                <label asp-for="PoliklinikId"
+                       class="form-label">
+                    Poliklinik
+                </label>
+
+                <select asp-for="PoliklinikId"
+                        asp-items="ViewBag.Poliklinikler"
+                        class="form-select">
+
+                    <option value="">
+                        Poliklinik seçiniz
+                    </option>
                 </select>
-                <span asp-validation-for="PoliklinikId" class="text-danger"></span>
+
+                <span asp-validation-for="PoliklinikId"
+                      class="text-danger">
+                </span>
             </div>
 
             <div class="col-md-4">
-                <label asp-for="Telefon" class="form-label">Telefon</label>
+                <label asp-for="Telefon"
+                       class="form-label">
+                    Telefon
+                </label>
+
                 <input asp-for="Telefon"
                        class="form-control only-digits"
                        maxlength="11"
                        inputmode="numeric"
                        placeholder="Örn: 05551234567" />
-                <span asp-validation-for="Telefon" class="text-danger"></span>
+
+                <span asp-validation-for="Telefon"
+                      class="text-danger">
+                </span>
             </div>
 
             <div class="col-md-4">
-                <label asp-for="Eposta" class="form-label">E-posta</label>
-                <input asp-for="Eposta" class="form-control" />
-                <span asp-validation-for="Eposta" class="text-danger"></span>
+                <label asp-for="Eposta"
+                       class="form-label">
+                    E-posta
+                </label>
+
+                <input asp-for="Eposta"
+                       class="form-control" />
+
+                <span asp-validation-for="Eposta"
+                      class="text-danger">
+                </span>
             </div>
         </div>
 
         <div class="mt-4">
-            <button type="submit" class="btn btn-main">Kaydet</button>
-            <a asp-controller="Doktor" asp-action="Index" class="btn btn-secondary">Geri Dön</a>
+            <button type="submit"
+                    class="btn btn-main">
+                Kaydet
+            </button>
+
+            <a asp-controller="Doktor"
+               asp-action="Index"
+               class="btn btn-secondary">
+                Geri Dön
+            </a>
         </div>
     </form>
 </div>

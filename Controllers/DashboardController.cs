@@ -15,18 +15,24 @@ namespace HBYS.Web.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(DateTime? tarih)
         {
-            string? kullaniciAdi = HttpContext.Session.GetString("KullaniciAdi");
+            string? kullaniciAdi =
+                HttpContext.Session.GetString("KullaniciAdi");
 
             if (string.IsNullOrEmpty(kullaniciAdi))
             {
                 return RedirectToAction("Login", "Account");
             }
 
-            string? adSoyad = HttpContext.Session.GetString("AdSoyad");
-            string? rolAdi = HttpContext.Session.GetString("RolAdi");
-            int? doktorId = HttpContext.Session.GetInt32("DoktorId");
+            string? adSoyad =
+                HttpContext.Session.GetString("AdSoyad");
+
+            string? rolAdi =
+                HttpContext.Session.GetString("RolAdi");
+
+            int? doktorId =
+                HttpContext.Session.GetInt32("DoktorId");
 
             bool adminMi = rolAdi == "Admin";
             bool doktorMu = rolAdi == "Doktor";
@@ -35,310 +41,382 @@ namespace HBYS.Web.Controllers
             bool eczaneMi = rolAdi == "Eczane";
             bool yoneticiMi = rolAdi == "Yonetici";
 
-            DateTime bugunBaslangic = DateTime.Today;
-            DateTime yarinBaslangic = bugunBaslangic.AddDays(1);
+            DateTime seciliTarih =
+                (tarih ?? DateTime.Today).Date;
 
-            int hastaSayisi = 0;
-            int doktorSayisi = 0;
-            int poliklinikSayisi = 0;
-            int randevuSayisi = 0;
-            int bugunRandevuSayisi = 0;
-            int bekleyenRandevuSayisi = 0;
-            int tamamlananRandevuSayisi = 0;
-            int muayeneSayisi = 0;
-            int bugunMuayeneSayisi = 0;
-            int receteSayisi = 0;
-            int tahlilSayisi = 0;
-            int bekleyenTahlilSayisi = 0;
+            DateTime gunBaslangic = seciliTarih;
+            DateTime gunBitis = seciliTarih.AddDays(1);
 
-            List<Randevu> sonRandevular = new List<Randevu>();
-            List<Muayene> sonMuayeneler = new List<Muayene>();
-            List<Recete> sonReceteler = new List<Recete>();
-            List<Tahlil> sonTahliller = new List<Tahlil>();
+            IQueryable<Randevu> randevuSorgusu =
+                _context.Randevular
+                    .AsNoTracking()
+                    .Where(r =>
+                        r.AktifMi &&
+                        r.RandevuTarihiSaati >= gunBaslangic &&
+                        r.RandevuTarihiSaati < gunBitis
+                    );
 
-            string dashboardBaslik = "Genel Yönetim Paneli";
-            string dashboardAciklama = "Yetkinize göre sistem özetleri görüntülenmektedir.";
+            IQueryable<Muayene> muayeneSorgusu =
+                _context.Muayeneler
+                    .AsNoTracking()
+                    .Where(m =>
+                        m.AktifMi &&
+                        m.MuayeneTarihi >= gunBaslangic &&
+                        m.MuayeneTarihi < gunBitis
+                    );
+
+            IQueryable<Recete> receteSorgusu =
+                _context.Receteler
+                    .AsNoTracking()
+                    .Where(r =>
+                        r.AktifMi &&
+                        r.KayitTarihi >= gunBaslangic &&
+                        r.KayitTarihi < gunBitis
+                    );
+
+            IQueryable<Tahlil> tahlilSorgusu =
+                _context.Tahliller
+                    .AsNoTracking()
+                    .Where(t =>
+                        t.AktifMi &&
+                        t.IstenmeTarihi >= gunBaslangic &&
+                        t.IstenmeTarihi < gunBitis
+                    );
+
+            string dashboardBaslik = "Genel Panel";
+
+            string dashboardAciklama =
+                "Seçilen güne ait yetkiniz kapsamındaki kayıtlar gösterilmektedir.";
+
             string? dashboardUyarisi = null;
 
-            if (adminMi || yoneticiMi)
-            {
-                hastaSayisi = _context.Hastalar.Count(h => h.AktifMi);
-                doktorSayisi = _context.Doktorlar.Count(d => d.AktifMi);
-                poliklinikSayisi = _context.Poliklinikler.Count(p => p.AktifMi);
-
-                randevuSayisi = _context.Randevular.Count(r => r.AktifMi);
-                bugunRandevuSayisi = _context.Randevular.Count(r =>
-                    r.AktifMi &&
-                    r.RandevuTarihiSaati >= bugunBaslangic &&
-                    r.RandevuTarihiSaati < yarinBaslangic);
-
-                bekleyenRandevuSayisi = _context.Randevular.Count(r =>
-                    r.AktifMi &&
-                    r.Durum == "Bekliyor");
-
-                tamamlananRandevuSayisi = _context.Randevular.Count(r =>
-                    r.AktifMi &&
-                    r.Durum == "Tamamlandi");
-
-                muayeneSayisi = _context.Muayeneler.Count(m => m.AktifMi);
-
-                bugunMuayeneSayisi = _context.Muayeneler.Count(m =>
-                    m.AktifMi &&
-                    m.MuayeneTarihi >= bugunBaslangic &&
-                    m.MuayeneTarihi < yarinBaslangic);
-
-                receteSayisi = _context.Receteler.Count(r => r.AktifMi);
-                tahlilSayisi = _context.Tahliller.Count(t => t.AktifMi);
-
-                bekleyenTahlilSayisi = _context.Tahliller.Count(t =>
-                    t.AktifMi &&
-                    t.Durum != "Sonuclandi" &&
-                    t.Durum != "Iptal");
-
-                sonRandevular = _context.Randevular
-                    .Include(r => r.Hasta)
-                    .Include(r => r.Doktor)
-                    .Include(r => r.Poliklinik)
-                    .Where(r => r.AktifMi)
-                    .OrderByDescending(r => r.RandevuTarihiSaati)
-                    .Take(5)
-                    .ToList();
-
-                sonMuayeneler = _context.Muayeneler
-                    .Include(m => m.Hasta)
-                    .Include(m => m.Doktor)
-                    .Where(m => m.AktifMi)
-                    .OrderByDescending(m => m.MuayeneTarihi)
-                    .Take(5)
-                    .ToList();
-
-                sonReceteler = _context.Receteler
-                    .Include(r => r.Muayene)
-                        .ThenInclude(m => m!.Hasta)
-                    .Include(r => r.Muayene)
-                        .ThenInclude(m => m!.Doktor)
-                    .Where(r => r.AktifMi)
-                    .OrderByDescending(r => r.KayitTarihi)
-                    .Take(5)
-                    .ToList();
-
-                sonTahliller = _context.Tahliller
-                    .Include(t => t.Muayene)
-                        .ThenInclude(m => m!.Hasta)
-                    .Include(t => t.Muayene)
-                        .ThenInclude(m => m!.Doktor)
-                    .Where(t => t.AktifMi)
-                    .OrderByDescending(t => t.IstenmeTarihi)
-                    .Take(5)
-                    .ToList();
-
-                dashboardBaslik = adminMi ? "Admin Yönetim Paneli" : "Yönetici Paneli";
-                dashboardAciklama = "Sistemdeki tüm aktif kayıtların genel özeti görüntülenmektedir.";
-            }
-            else if (sekreterMi)
-            {
-                hastaSayisi = _context.Hastalar.Count(h => h.AktifMi);
-                doktorSayisi = _context.Doktorlar.Count(d => d.AktifMi);
-                poliklinikSayisi = _context.Poliklinikler.Count(p => p.AktifMi);
-
-                randevuSayisi = _context.Randevular.Count(r => r.AktifMi);
-
-                bugunRandevuSayisi = _context.Randevular.Count(r =>
-                    r.AktifMi &&
-                    r.RandevuTarihiSaati >= bugunBaslangic &&
-                    r.RandevuTarihiSaati < yarinBaslangic);
-
-                bekleyenRandevuSayisi = _context.Randevular.Count(r =>
-                    r.AktifMi &&
-                    r.Durum == "Bekliyor");
-
-                tamamlananRandevuSayisi = _context.Randevular.Count(r =>
-                    r.AktifMi &&
-                    r.Durum == "Tamamlandi");
-
-                sonRandevular = _context.Randevular
-                    .Include(r => r.Hasta)
-                    .Include(r => r.Doktor)
-                    .Include(r => r.Poliklinik)
-                    .Where(r => r.AktifMi)
-                    .OrderByDescending(r => r.RandevuTarihiSaati)
-                    .Take(5)
-                    .ToList();
-
-                dashboardBaslik = "Sekreter Paneli";
-                dashboardAciklama = "Hasta, doktor ve randevu işlemlerine ait özet bilgiler görüntülenmektedir.";
-            }
-            else if (doktorMu)
+            if (doktorMu)
             {
                 if (!doktorId.HasValue)
                 {
-                    dashboardUyarisi = "Bu doktor kullanıcısı herhangi bir doktor kaydıyla eşleştirilmemiş. Kullanıcı İşlemleri ekranından doktora bağlanmalıdır.";
+                    dashboardUyarisi =
+                        "Bu doktor kullanıcısı bir doktor kaydıyla eşleştirilmemiştir.";
+
+                    randevuSorgusu =
+                        randevuSorgusu.Where(r => false);
+
+                    muayeneSorgusu =
+                        muayeneSorgusu.Where(m => false);
+
+                    receteSorgusu =
+                        receteSorgusu.Where(r => false);
+
+                    tahlilSorgusu =
+                        tahlilSorgusu.Where(t => false);
                 }
                 else
                 {
                     int aktifDoktorId = doktorId.Value;
 
-                    hastaSayisi = _context.Randevular
-                        .Where(r => r.AktifMi && r.DoktorId == aktifDoktorId)
-                        .Select(r => r.HastaId)
-                        .Distinct()
-                        .Count();
+                    randevuSorgusu =
+                        randevuSorgusu.Where(r =>
+                            r.DoktorId == aktifDoktorId
+                        );
 
-                    doktorSayisi = _context.Doktorlar.Count(d =>
-                        d.AktifMi &&
-                        d.DoktorId == aktifDoktorId);
+                    muayeneSorgusu =
+                        muayeneSorgusu.Where(m =>
+                            m.DoktorId == aktifDoktorId
+                        );
 
-                    poliklinikSayisi = _context.Doktorlar
-                        .Where(d => d.AktifMi && d.DoktorId == aktifDoktorId)
-                        .Select(d => d.PoliklinikId)
-                        .Distinct()
-                        .Count();
-
-                    randevuSayisi = _context.Randevular.Count(r =>
-                        r.AktifMi &&
-                        r.DoktorId == aktifDoktorId);
-
-                    bugunRandevuSayisi = _context.Randevular.Count(r =>
-                        r.AktifMi &&
-                        r.DoktorId == aktifDoktorId &&
-                        r.RandevuTarihiSaati >= bugunBaslangic &&
-                        r.RandevuTarihiSaati < yarinBaslangic);
-
-                    bekleyenRandevuSayisi = _context.Randevular.Count(r =>
-                        r.AktifMi &&
-                        r.DoktorId == aktifDoktorId &&
-                        r.Durum == "Bekliyor");
-
-                    tamamlananRandevuSayisi = _context.Randevular.Count(r =>
-                        r.AktifMi &&
-                        r.DoktorId == aktifDoktorId &&
-                        r.Durum == "Tamamlandi");
-
-                    muayeneSayisi = _context.Muayeneler.Count(m =>
-                        m.AktifMi &&
-                        m.DoktorId == aktifDoktorId);
-
-                    bugunMuayeneSayisi = _context.Muayeneler.Count(m =>
-                        m.AktifMi &&
-                        m.DoktorId == aktifDoktorId &&
-                        m.MuayeneTarihi >= bugunBaslangic &&
-                        m.MuayeneTarihi < yarinBaslangic);
-
-                    receteSayisi = _context.Receteler.Count(r =>
-                        r.AktifMi &&
-                        r.Muayene != null &&
-                        r.Muayene.DoktorId == aktifDoktorId);
-
-                    tahlilSayisi = _context.Tahliller.Count(t =>
-                        t.AktifMi &&
-                        t.Muayene != null &&
-                        t.Muayene.DoktorId == aktifDoktorId);
-
-                    bekleyenTahlilSayisi = _context.Tahliller.Count(t =>
-                        t.AktifMi &&
-                        t.Muayene != null &&
-                        t.Muayene.DoktorId == aktifDoktorId &&
-                        t.Durum != "Sonuclandi" &&
-                        t.Durum != "Iptal");
-
-                    sonRandevular = _context.Randevular
-                        .Include(r => r.Hasta)
-                        .Include(r => r.Doktor)
-                        .Include(r => r.Poliklinik)
-                        .Where(r => r.AktifMi && r.DoktorId == aktifDoktorId)
-                        .OrderByDescending(r => r.RandevuTarihiSaati)
-                        .Take(5)
-                        .ToList();
-
-                    sonMuayeneler = _context.Muayeneler
-                        .Include(m => m.Hasta)
-                        .Include(m => m.Doktor)
-                        .Where(m => m.AktifMi && m.DoktorId == aktifDoktorId)
-                        .OrderByDescending(m => m.MuayeneTarihi)
-                        .Take(5)
-                        .ToList();
-
-                    sonReceteler = _context.Receteler
-                        .Include(r => r.Muayene)
-                            .ThenInclude(m => m!.Hasta)
-                        .Include(r => r.Muayene)
-                            .ThenInclude(m => m!.Doktor)
-                        .Where(r =>
-                            r.AktifMi &&
+                    receteSorgusu =
+                        receteSorgusu.Where(r =>
                             r.Muayene != null &&
-                            r.Muayene.DoktorId == aktifDoktorId)
-                        .OrderByDescending(r => r.KayitTarihi)
-                        .Take(5)
-                        .ToList();
+                            r.Muayene.DoktorId ==
+                            aktifDoktorId
+                        );
 
-                    sonTahliller = _context.Tahliller
-                        .Include(t => t.Muayene)
-                            .ThenInclude(m => m!.Hasta)
-                        .Include(t => t.Muayene)
-                            .ThenInclude(m => m!.Doktor)
-                        .Where(t =>
-                            t.AktifMi &&
+                    tahlilSorgusu =
+                        tahlilSorgusu.Where(t =>
                             t.Muayene != null &&
-                            t.Muayene.DoktorId == aktifDoktorId)
-                        .OrderByDescending(t => t.IstenmeTarihi)
-                        .Take(5)
-                        .ToList();
+                            t.Muayene.DoktorId ==
+                            aktifDoktorId
+                        );
                 }
 
                 dashboardBaslik = "Doktor Paneli";
-                dashboardAciklama = "Sadece size bağlı randevu, muayene, reçete ve tahlil kayıtları görüntülenmektedir.";
+
+                dashboardAciklama =
+                    "Seçilen gün için yalnızca size ait hasta, randevu, muayene, reçete ve tahlil kayıtları gösterilmektedir.";
+            }
+            else if (sekreterMi)
+            {
+                muayeneSorgusu =
+                    muayeneSorgusu.Where(m => false);
+
+                receteSorgusu =
+                    receteSorgusu.Where(r => false);
+
+                tahlilSorgusu =
+                    tahlilSorgusu.Where(t => false);
+
+                dashboardBaslik = "Sekreter Paneli";
+
+                dashboardAciklama =
+                    "Seçilen günün hasta ve randevu hareketleri gösterilmektedir.";
             }
             else if (laborantMi)
             {
-                hastaSayisi = _context.Tahliller
-                    .Where(t => t.AktifMi && t.Muayene != null)
-                    .Select(t => t.Muayene!.HastaId)
-                    .Distinct()
-                    .Count();
+                randevuSorgusu =
+                    randevuSorgusu.Where(r => false);
 
-                tahlilSayisi = _context.Tahliller.Count(t => t.AktifMi);
+                muayeneSorgusu =
+                    muayeneSorgusu.Where(m => false);
 
-                bekleyenTahlilSayisi = _context.Tahliller.Count(t =>
-                    t.AktifMi &&
-                    t.Durum != "Sonuclandi" &&
-                    t.Durum != "Iptal");
-
-                sonTahliller = _context.Tahliller
-                    .Include(t => t.Muayene)
-                        .ThenInclude(m => m!.Hasta)
-                    .Include(t => t.Muayene)
-                        .ThenInclude(m => m!.Doktor)
-                    .Where(t => t.AktifMi)
-                    .OrderByDescending(t => t.IstenmeTarihi)
-                    .Take(5)
-                    .ToList();
+                receteSorgusu =
+                    receteSorgusu.Where(r => false);
 
                 dashboardBaslik = "Laborant Paneli";
-                dashboardAciklama = "Tahlil işlemlerine ait özet bilgiler görüntülenmektedir.";
+
+                dashboardAciklama =
+                    "Seçilen günün tahlil işlemleri gösterilmektedir.";
             }
             else if (eczaneMi)
             {
-                hastaSayisi = _context.Receteler
-                    .Where(r => r.AktifMi && r.Muayene != null)
+                randevuSorgusu =
+                    randevuSorgusu.Where(r => false);
+
+                muayeneSorgusu =
+                    muayeneSorgusu.Where(m => false);
+
+                tahlilSorgusu =
+                    tahlilSorgusu.Where(t => false);
+
+                dashboardBaslik = "Eczane Paneli";
+
+                dashboardAciklama =
+                    "Seçilen günün reçete işlemleri gösterilmektedir.";
+            }
+            else if (adminMi || yoneticiMi)
+            {
+                dashboardBaslik =
+                    adminMi
+                        ? "Admin Yönetim Paneli"
+                        : "Yönetici Paneli";
+
+                dashboardAciklama =
+                    "Seçilen güne ait hastane hareketlerinin genel özeti gösterilmektedir.";
+            }
+            else
+            {
+                randevuSorgusu =
+                    randevuSorgusu.Where(r => false);
+
+                muayeneSorgusu =
+                    muayeneSorgusu.Where(m => false);
+
+                receteSorgusu =
+                    receteSorgusu.Where(r => false);
+
+                tahlilSorgusu =
+                    tahlilSorgusu.Where(t => false);
+
+                dashboardUyarisi =
+                    "Bu yetki için dashboard görünümü tanımlanmamıştır.";
+            }
+
+            List<int> randevuHastaIdleri =
+                randevuSorgusu
+                    .Select(r => r.HastaId)
+                    .Distinct()
+                    .ToList();
+
+            List<int> muayeneHastaIdleri =
+                muayeneSorgusu
+                    .Select(m => m.HastaId)
+                    .Distinct()
+                    .ToList();
+
+            List<int> receteHastaIdleri =
+                receteSorgusu
+                    .Where(r => r.Muayene != null)
                     .Select(r => r.Muayene!.HastaId)
+                    .Distinct()
+                    .ToList();
+
+            List<int> tahlilHastaIdleri =
+                tahlilSorgusu
+                    .Where(t => t.Muayene != null)
+                    .Select(t => t.Muayene!.HastaId)
+                    .Distinct()
+                    .ToList();
+
+            int hastaSayisi;
+
+            if (sekreterMi)
+            {
+                hastaSayisi =
+                    randevuHastaIdleri.Count;
+            }
+            else if (laborantMi)
+            {
+                hastaSayisi =
+                    tahlilHastaIdleri.Count;
+            }
+            else if (eczaneMi)
+            {
+                hastaSayisi =
+                    receteHastaIdleri.Count;
+            }
+            else
+            {
+                hastaSayisi =
+                    randevuHastaIdleri
+                        .Union(muayeneHastaIdleri)
+                        .Union(receteHastaIdleri)
+                        .Union(tahlilHastaIdleri)
+                        .Distinct()
+                        .Count();
+            }
+
+            List<int> randevuDoktorIdleri =
+                randevuSorgusu
+                    .Select(r => r.DoktorId)
+                    .Distinct()
+                    .ToList();
+
+            List<int> muayeneDoktorIdleri =
+                muayeneSorgusu
+                    .Select(m => m.DoktorId)
+                    .Distinct()
+                    .ToList();
+
+            List<int> receteDoktorIdleri =
+                receteSorgusu
+                    .Where(r => r.Muayene != null)
+                    .Select(r => r.Muayene!.DoktorId)
+                    .Distinct()
+                    .ToList();
+
+            List<int> tahlilDoktorIdleri =
+                tahlilSorgusu
+                    .Where(t => t.Muayene != null)
+                    .Select(t => t.Muayene!.DoktorId)
+                    .Distinct()
+                    .ToList();
+
+            int doktorSayisi;
+
+            if (doktorMu)
+            {
+                doktorSayisi =
+                    doktorId.HasValue &&
+                    _context.Doktorlar.Any(d =>
+                        d.AktifMi &&
+                        d.DoktorId == doktorId.Value
+                    )
+                        ? 1
+                        : 0;
+            }
+            else if (sekreterMi)
+            {
+                doktorSayisi =
+                    randevuDoktorIdleri.Count;
+            }
+            else if (laborantMi)
+            {
+                doktorSayisi =
+                    tahlilDoktorIdleri.Count;
+            }
+            else if (eczaneMi)
+            {
+                doktorSayisi =
+                    receteDoktorIdleri.Count;
+            }
+            else
+            {
+                doktorSayisi =
+                    randevuDoktorIdleri
+                        .Union(muayeneDoktorIdleri)
+                        .Union(receteDoktorIdleri)
+                        .Union(tahlilDoktorIdleri)
+                        .Distinct()
+                        .Count();
+            }
+
+            int poliklinikSayisi =
+                randevuSorgusu
+                    .Select(r => r.PoliklinikId)
                     .Distinct()
                     .Count();
 
-                receteSayisi = _context.Receteler.Count(r => r.AktifMi);
+            int randevuSayisi =
+                randevuSorgusu.Count();
 
-                sonReceteler = _context.Receteler
+            int bekleyenRandevuSayisi =
+                randevuSorgusu.Count(r =>
+                    r.Durum == "Bekliyor"
+                );
+
+            int tamamlananRandevuSayisi =
+                randevuSorgusu.Count(r =>
+                    r.Durum == "Tamamlandi"
+                );
+
+            int iptalRandevuSayisi =
+                randevuSorgusu.Count(r =>
+                    r.Durum == "Iptal"
+                );
+
+            int muayeneSayisi =
+                muayeneSorgusu.Count();
+
+            int receteSayisi =
+                receteSorgusu.Count();
+
+            int tahlilSayisi =
+                tahlilSorgusu.Count();
+
+            int bekleyenTahlilSayisi =
+                tahlilSorgusu.Count(t =>
+                    t.Durum != "Sonuclandi" &&
+                    t.Durum != "Iptal"
+                );
+
+            List<Randevu> gununRandevulari =
+                randevuSorgusu
+                    .Include(r => r.Hasta)
+                    .Include(r => r.Doktor)
+                    .Include(r => r.Poliklinik)
+                    .OrderBy(r =>
+                        r.RandevuTarihiSaati
+                    )
+                    .ToList();
+
+            List<Muayene> gununMuayeneleri =
+                muayeneSorgusu
+                    .Include(m => m.Hasta)
+                    .Include(m => m.Doktor)
+                    .OrderBy(m =>
+                        m.MuayeneTarihi
+                    )
+                    .ToList();
+
+            List<Recete> gununReceteleri =
+                receteSorgusu
                     .Include(r => r.Muayene)
                         .ThenInclude(m => m!.Hasta)
                     .Include(r => r.Muayene)
                         .ThenInclude(m => m!.Doktor)
-                    .Where(r => r.AktifMi)
-                    .OrderByDescending(r => r.KayitTarihi)
-                    .Take(5)
+                    .OrderBy(r =>
+                        r.KayitTarihi
+                    )
                     .ToList();
 
-                dashboardBaslik = "Eczane Paneli";
-                dashboardAciklama = "Reçete işlemlerine ait özet bilgiler görüntülenmektedir.";
-            }
+            List<Tahlil> gununTahlilleri =
+                tahlilSorgusu
+                    .Include(t => t.Muayene)
+                        .ThenInclude(m => m!.Hasta)
+                    .Include(t => t.Muayene)
+                        .ThenInclude(m => m!.Doktor)
+                    .OrderBy(t =>
+                        t.IstenmeTarihi
+                    )
+                    .ToList();
 
             ViewBag.AdSoyad = adSoyad;
             ViewBag.YetkiAdi = rolAdi;
@@ -352,30 +430,79 @@ namespace HBYS.Web.Controllers
             ViewBag.EczaneMi = eczaneMi;
             ViewBag.YoneticiMi = yoneticiMi;
 
-            ViewBag.DashboardBaslik = dashboardBaslik;
-            ViewBag.DashboardAciklama = dashboardAciklama;
-            ViewBag.DashboardUyarisi = dashboardUyarisi;
+            ViewBag.DashboardBaslik =
+                dashboardBaslik;
 
-            ViewBag.HastaSayisi = hastaSayisi;
-            ViewBag.DoktorSayisi = doktorSayisi;
-            ViewBag.PoliklinikSayisi = poliklinikSayisi;
+            ViewBag.DashboardAciklama =
+                dashboardAciklama;
 
-            ViewBag.RandevuSayisi = randevuSayisi;
-            ViewBag.BugunRandevuSayisi = bugunRandevuSayisi;
-            ViewBag.BekleyenRandevuSayisi = bekleyenRandevuSayisi;
-            ViewBag.TamamlananRandevuSayisi = tamamlananRandevuSayisi;
+            ViewBag.DashboardUyarisi =
+                dashboardUyarisi;
 
-            ViewBag.MuayeneSayisi = muayeneSayisi;
-            ViewBag.BugunMuayeneSayisi = bugunMuayeneSayisi;
+            ViewBag.SeciliTarih =
+                seciliTarih.ToString("yyyy-MM-dd");
 
-            ViewBag.ReceteSayisi = receteSayisi;
-            ViewBag.TahlilSayisi = tahlilSayisi;
-            ViewBag.BekleyenTahlilSayisi = bekleyenTahlilSayisi;
+            ViewBag.SeciliTarihYazi =
+                seciliTarih.ToString("dd.MM.yyyy");
 
-            ViewBag.SonRandevular = sonRandevular;
-            ViewBag.SonMuayeneler = sonMuayeneler;
-            ViewBag.SonReceteler = sonReceteler;
-            ViewBag.SonTahliller = sonTahliller;
+            ViewBag.OncekiGun =
+                seciliTarih
+                    .AddDays(-1)
+                    .ToString("yyyy-MM-dd");
+
+            ViewBag.SonrakiGun =
+                seciliTarih
+                    .AddDays(1)
+                    .ToString("yyyy-MM-dd");
+
+            ViewBag.Bugun =
+                DateTime.Today
+                    .ToString("yyyy-MM-dd");
+
+            ViewBag.HastaSayisi =
+                hastaSayisi;
+
+            ViewBag.DoktorSayisi =
+                doktorSayisi;
+
+            ViewBag.PoliklinikSayisi =
+                poliklinikSayisi;
+
+            ViewBag.RandevuSayisi =
+                randevuSayisi;
+
+            ViewBag.BekleyenRandevuSayisi =
+                bekleyenRandevuSayisi;
+
+            ViewBag.TamamlananRandevuSayisi =
+                tamamlananRandevuSayisi;
+
+            ViewBag.IptalRandevuSayisi =
+                iptalRandevuSayisi;
+
+            ViewBag.MuayeneSayisi =
+                muayeneSayisi;
+
+            ViewBag.ReceteSayisi =
+                receteSayisi;
+
+            ViewBag.TahlilSayisi =
+                tahlilSayisi;
+
+            ViewBag.BekleyenTahlilSayisi =
+                bekleyenTahlilSayisi;
+
+            ViewBag.GununRandevulari =
+                gununRandevulari;
+
+            ViewBag.GununMuayeneleri =
+                gununMuayeneleri;
+
+            ViewBag.GununReceteleri =
+                gununReceteleri;
+
+            ViewBag.GununTahlilleri =
+                gununTahlilleri;
 
             return View();
         }

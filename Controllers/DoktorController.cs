@@ -1,9 +1,9 @@
 ﻿using HBYS.Web.Data;
+using HBYS.Web.Helpers;
 using HBYS.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using HBYS.Web.Helpers;
 
 namespace HBYS.Web.Controllers
 {
@@ -18,13 +18,16 @@ namespace HBYS.Web.Controllers
 
         private bool GirisYapildiMi()
         {
-            string? kullaniciAdi = HttpContext.Session.GetString("KullaniciAdi");
+            string? kullaniciAdi =
+                HttpContext.Session.GetString("KullaniciAdi");
+
             return !string.IsNullOrEmpty(kullaniciAdi);
         }
 
         private bool DoktorIslemiYetkisiVarMi()
         {
-            string? rolAdi = HttpContext.Session.GetString("RolAdi");
+            string? rolAdi =
+                HttpContext.Session.GetString("RolAdi");
 
             return rolAdi == "Admin" ||
                    rolAdi == "Sekreter" ||
@@ -47,7 +50,10 @@ namespace HBYS.Web.Controllers
         {
             if (!GirisYapildiMi())
             {
-                return RedirectToAction("Login", "Account");
+                return RedirectToAction(
+                    "Login",
+                    "Account"
+                );
             }
 
             var doktorlar = _context.Doktorlar
@@ -58,16 +64,27 @@ namespace HBYS.Web.Controllers
             if (!string.IsNullOrWhiteSpace(arama))
             {
                 doktorlar = doktorlar.Where(d =>
-                    d.SicilNo.Contains(arama) ||
+                    d.TcKimlikNo.Contains(arama) ||
                     d.Ad.Contains(arama) ||
                     d.Soyad.Contains(arama) ||
-                    (d.Unvan != null && d.Unvan.Contains(arama)) ||
-                    (d.Poliklinik != null && d.Poliklinik.PoliklinikAdi.Contains(arama)));
+                    (
+                        d.Unvan != null &&
+                        d.Unvan.Contains(arama)
+                    ) ||
+                    (
+                        d.Poliklinik != null &&
+                        d.Poliklinik.PoliklinikAdi.Contains(arama)
+                    )
+                );
             }
 
             ViewBag.Arama = arama;
 
-            return View(doktorlar.OrderByDescending(d => d.KayitTarihi).ToList());
+            return View(
+                doktorlar
+                    .OrderByDescending(d => d.KayitTarihi)
+                    .ToList()
+            );
         }
 
         [HttpGet]
@@ -75,12 +92,17 @@ namespace HBYS.Web.Controllers
         {
             if (!GirisYapildiMi())
             {
-                return RedirectToAction("Login", "Account");
+                return RedirectToAction(
+                    "Login",
+                    "Account"
+                );
             }
 
             if (!DoktorIslemiYetkisiVarMi())
             {
-                TempData["Hata"] = "Bu işlem için yetkiniz yok.";
+                TempData["Hata"] =
+                    "Bu işlem için yetkiniz yok.";
+
                 return RedirectToAction("Index");
             }
 
@@ -88,87 +110,147 @@ namespace HBYS.Web.Controllers
 
             return View();
         }
+
         public IActionResult Details(int id)
         {
             if (!GirisYapildiMi())
             {
-                return RedirectToAction("Login", "Account");
+                return RedirectToAction(
+                    "Login",
+                    "Account"
+                );
             }
 
-            string? rolAdi = HttpContext.Session.GetString("RolAdi");
+            string? rolAdi =
+                HttpContext.Session.GetString("RolAdi");
 
-            if (rolAdi != "Admin" && rolAdi != "Sekreter" && rolAdi != "Yonetici" && rolAdi != "Doktor")
+            if (rolAdi != "Admin" &&
+                rolAdi != "Sekreter" &&
+                rolAdi != "Yonetici" &&
+                rolAdi != "Doktor")
             {
-                TempData["Hata"] = "Bu sayfayı görüntüleme yetkiniz yok.";
-                return RedirectToAction("Index", "Dashboard");
+                TempData["Hata"] =
+                    "Bu sayfayı görüntüleme yetkiniz yok.";
+
+                return RedirectToAction(
+                    "Index",
+                    "Dashboard"
+                );
             }
 
             var doktor = _context.Doktorlar
                 .Include(d => d.Poliklinik)
-                .FirstOrDefault(d => d.DoktorId == id && d.AktifMi);
+                .FirstOrDefault(d =>
+                    d.DoktorId == id &&
+                    d.AktifMi
+                );
 
             if (doktor == null)
             {
-                TempData["Hata"] = "Doktor kaydı bulunamadı.";
+                TempData["Hata"] =
+                    "Doktor kaydı bulunamadı.";
+
                 return RedirectToAction("Index");
             }
 
             ViewBag.Randevular = _context.Randevular
                 .Include(r => r.Hasta)
                 .Include(r => r.Poliklinik)
-                .Where(r => r.DoktorId == id && r.AktifMi)
-                .OrderByDescending(r => r.RandevuTarihiSaati)
+                .Where(r =>
+                    r.DoktorId == id &&
+                    r.AktifMi
+                )
+                .OrderByDescending(r =>
+                    r.RandevuTarihiSaati
+                )
                 .ToList();
 
             ViewBag.Muayeneler = _context.Muayeneler
                 .Include(m => m.Hasta)
-                .Where(m => m.DoktorId == id && m.AktifMi)
-                .OrderByDescending(m => m.MuayeneTarihi)
+                .Where(m =>
+                    m.DoktorId == id &&
+                    m.AktifMi
+                )
+                .OrderByDescending(m =>
+                    m.MuayeneTarihi
+                )
                 .ToList();
 
             ViewBag.Kullanicilar = _context.Kullanicilar
                 .Include(k => k.Rol)
-                .Where(k => k.DoktorId == id && k.AktifMi)
+                .Where(k =>
+                    k.DoktorId == id &&
+                    k.AktifMi
+                )
                 .OrderBy(k => k.KullaniciAdi)
                 .ToList();
 
             return View(doktor);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(Doktor doktor)
         {
             if (!GirisYapildiMi())
             {
-                return RedirectToAction("Login", "Account");
+                return RedirectToAction(
+                    "Login",
+                    "Account"
+                );
             }
 
             if (!DoktorIslemiYetkisiVarMi())
             {
-                TempData["Hata"] = "Bu işlem için yetkiniz yok.";
+                TempData["Hata"] =
+                    "Bu işlem için yetkiniz yok.";
+
                 return RedirectToAction("Index");
+            }
+
+            if (!ValidationHelper.TcKimlikNoGecerliMi(
+                    doktor.TcKimlikNo))
+            {
+                ModelState.AddModelError(
+                    "TcKimlikNo",
+                    "TC kimlik no 11 haneli olmalı ve sadece rakamlardan oluşmalıdır."
+                );
             }
 
             if (doktor.PoliklinikId <= 0)
             {
-                ModelState.AddModelError("PoliklinikId", "Poliklinik seçiniz.");
+                ModelState.AddModelError(
+                    "PoliklinikId",
+                    "Poliklinik seçiniz."
+                );
             }
 
-            bool sicilVarMi = _context.Doktorlar.Any(d =>
-                d.SicilNo == doktor.SicilNo &&
-                d.AktifMi);
+            bool tcVarMi = _context.Doktorlar.Any(d =>
+                d.TcKimlikNo == doktor.TcKimlikNo &&
+                d.AktifMi
+            );
 
-            if (sicilVarMi)
+            if (tcVarMi)
             {
-                ModelState.AddModelError("SicilNo", "Bu sicil numarası ile kayıtlı aktif doktor zaten var.");
+                ModelState.AddModelError(
+                    "TcKimlikNo",
+                    "Bu TC kimlik numarası ile kayıtlı aktif doktor zaten var."
+                );
             }
-            if (!ValidationHelper.TelefonGecerliMi(doktor.Telefon))
+
+            if (!ValidationHelper.TelefonGecerliMi(
+                    doktor.Telefon))
             {
-                ModelState.AddModelError("Telefon", "Telefon numarası sadece rakamlardan oluşmalı ve 10 veya 11 haneli olmalıdır.");
+                ModelState.AddModelError(
+                    "Telefon",
+                    "Telefon numarası sadece rakamlardan oluşmalı ve 10 veya 11 haneli olmalıdır."
+                );
             }
+
             if (!ModelState.IsValid)
             {
                 PoliklinikleriHazirla();
+
                 return View(doktor);
             }
 
@@ -178,7 +260,8 @@ namespace HBYS.Web.Controllers
             _context.Doktorlar.Add(doktor);
             _context.SaveChanges();
 
-            TempData["Basari"] = "Doktor kaydı başarıyla eklendi.";
+            TempData["Basari"] =
+                "Doktor kaydı başarıyla eklendi.";
 
             return RedirectToAction("Index");
         }
@@ -188,20 +271,31 @@ namespace HBYS.Web.Controllers
         {
             if (!GirisYapildiMi())
             {
-                return RedirectToAction("Login", "Account");
+                return RedirectToAction(
+                    "Login",
+                    "Account"
+                );
             }
 
             if (!DoktorIslemiYetkisiVarMi())
             {
-                TempData["Hata"] = "Bu işlem için yetkiniz yok.";
+                TempData["Hata"] =
+                    "Bu işlem için yetkiniz yok.";
+
                 return RedirectToAction("Index");
             }
 
-            var doktor = _context.Doktorlar.FirstOrDefault(d => d.DoktorId == id && d.AktifMi);
+            var doktor = _context.Doktorlar
+                .FirstOrDefault(d =>
+                    d.DoktorId == id &&
+                    d.AktifMi
+                );
 
             if (doktor == null)
             {
-                TempData["Hata"] = "Doktor kaydı bulunamadı.";
+                TempData["Hata"] =
+                    "Doktor kaydı bulunamadı.";
+
                 return RedirectToAction("Index");
             }
 
@@ -216,59 +310,107 @@ namespace HBYS.Web.Controllers
         {
             if (!GirisYapildiMi())
             {
-                return RedirectToAction("Login", "Account");
+                return RedirectToAction(
+                    "Login",
+                    "Account"
+                );
             }
 
             if (!DoktorIslemiYetkisiVarMi())
             {
-                TempData["Hata"] = "Bu işlem için yetkiniz yok.";
+                TempData["Hata"] =
+                    "Bu işlem için yetkiniz yok.";
+
                 return RedirectToAction("Index");
+            }
+
+            if (!ValidationHelper.TcKimlikNoGecerliMi(
+                    doktor.TcKimlikNo))
+            {
+                ModelState.AddModelError(
+                    "TcKimlikNo",
+                    "TC kimlik no 11 haneli olmalı ve sadece rakamlardan oluşmalıdır."
+                );
             }
 
             if (doktor.PoliklinikId <= 0)
             {
-                ModelState.AddModelError("PoliklinikId", "Poliklinik seçiniz.");
+                ModelState.AddModelError(
+                    "PoliklinikId",
+                    "Poliklinik seçiniz."
+                );
             }
 
-            bool sicilBaskaDoktordaVarMi = _context.Doktorlar.Any(d =>
-                d.SicilNo == doktor.SicilNo &&
-                d.DoktorId != doktor.DoktorId &&
-                d.AktifMi);
+            bool tcBaskaDoktordaVarMi =
+                _context.Doktorlar.Any(d =>
+                    d.TcKimlikNo == doktor.TcKimlikNo &&
+                    d.DoktorId != doktor.DoktorId &&
+                    d.AktifMi
+                );
 
-            if (sicilBaskaDoktordaVarMi)
+            if (tcBaskaDoktordaVarMi)
             {
-                ModelState.AddModelError("SicilNo", "Bu sicil numarası başka bir doktorda kullanılıyor.");
+                ModelState.AddModelError(
+                    "TcKimlikNo",
+                    "Bu TC kimlik numarası başka bir doktorda kullanılıyor."
+                );
             }
-            if (!ValidationHelper.TelefonGecerliMi(doktor.Telefon))
+
+            if (!ValidationHelper.TelefonGecerliMi(
+                    doktor.Telefon))
             {
-                ModelState.AddModelError("Telefon", "Telefon numarası sadece rakamlardan oluşmalı ve 10 veya 11 haneli olmalıdır.");
+                ModelState.AddModelError(
+                    "Telefon",
+                    "Telefon numarası sadece rakamlardan oluşmalı ve 10 veya 11 haneli olmalıdır."
+                );
             }
+
             if (!ModelState.IsValid)
             {
                 PoliklinikleriHazirla();
+
                 return View(doktor);
             }
 
-            var guncellenecekDoktor = _context.Doktorlar
-                .FirstOrDefault(d => d.DoktorId == doktor.DoktorId && d.AktifMi);
+            var guncellenecekDoktor =
+                _context.Doktorlar.FirstOrDefault(d =>
+                    d.DoktorId == doktor.DoktorId &&
+                    d.AktifMi
+                );
 
             if (guncellenecekDoktor == null)
             {
-                TempData["Hata"] = "Doktor kaydı bulunamadı.";
+                TempData["Hata"] =
+                    "Doktor kaydı bulunamadı.";
+
                 return RedirectToAction("Index");
             }
 
-            guncellenecekDoktor.SicilNo = doktor.SicilNo;
-            guncellenecekDoktor.Ad = doktor.Ad;
-            guncellenecekDoktor.Soyad = doktor.Soyad;
-            guncellenecekDoktor.Unvan = doktor.Unvan;
-            guncellenecekDoktor.Telefon = doktor.Telefon;
-            guncellenecekDoktor.Eposta = doktor.Eposta;
-            guncellenecekDoktor.PoliklinikId = doktor.PoliklinikId;
+            guncellenecekDoktor.TcKimlikNo =
+                doktor.TcKimlikNo;
+
+            guncellenecekDoktor.Ad =
+                doktor.Ad;
+
+            guncellenecekDoktor.Soyad =
+                doktor.Soyad;
+
+            guncellenecekDoktor.Unvan =
+                doktor.Unvan;
+
+            guncellenecekDoktor.Telefon =
+                doktor.Telefon;
+
+            guncellenecekDoktor.Eposta =
+                doktor.Eposta;
+
+            guncellenecekDoktor.PoliklinikId =
+                doktor.PoliklinikId;
 
             _context.SaveChanges();
 
-            TempData["Basari"] = "Doktor kaydı başarıyla güncellendi.";
+            TempData["Basari"] =
+                "Doktor kaydı başarıyla güncellendi.";
 
             return RedirectToAction("Index");
         }
@@ -279,20 +421,31 @@ namespace HBYS.Web.Controllers
         {
             if (!GirisYapildiMi())
             {
-                return RedirectToAction("Login", "Account");
+                return RedirectToAction(
+                    "Login",
+                    "Account"
+                );
             }
 
             if (!DoktorIslemiYetkisiVarMi())
             {
-                TempData["Hata"] = "Doktor silme işlemi için yetkiniz yok.";
+                TempData["Hata"] =
+                    "Doktor silme işlemi için yetkiniz yok.";
+
                 return RedirectToAction("Index");
             }
 
-            var doktor = _context.Doktorlar.FirstOrDefault(d => d.DoktorId == id && d.AktifMi);
+            var doktor = _context.Doktorlar
+                .FirstOrDefault(d =>
+                    d.DoktorId == id &&
+                    d.AktifMi
+                );
 
             if (doktor == null)
             {
-                TempData["Hata"] = "Doktor kaydı bulunamadı.";
+                TempData["Hata"] =
+                    "Doktor kaydı bulunamadı.";
+
                 return RedirectToAction("Index");
             }
 
@@ -300,7 +453,8 @@ namespace HBYS.Web.Controllers
 
             _context.SaveChanges();
 
-            TempData["Basari"] = "Doktor kaydı başarıyla silindi.";
+            TempData["Basari"] =
+                "Doktor kaydı başarıyla silindi.";
 
             return RedirectToAction("Index");
         }

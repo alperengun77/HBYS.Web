@@ -1,17 +1,29 @@
 ﻿@model List<HBYS.Web.Models.Muayene>
+@using Microsoft.AspNetCore.Http
 
 @{
     ViewData["Title"] = "Muayene İşlemleri";
+
+    string? rolAdi = Context.Session.GetString("RolAdi");
+
+    bool hizliIslemYetkisiVarMi =
+        rolAdi == "Admin" ||
+        rolAdi == "Doktor";
 }
 
 <div class="page-card">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
             <h3>Muayene İşlemleri</h3>
-            <p class="text-muted mb-0">Muayene kayıtlarını listele, ara, ekle, güncelle ve sil.</p>
+
+            <p class="text-muted mb-0">
+                Muayene kayıtlarını listele, ara, ekle, güncelle ve sil.
+            </p>
         </div>
 
-        <a asp-controller="Muayene" asp-action="Create" class="btn btn-main">
+        <a asp-controller="Muayene"
+           asp-action="Create"
+           class="btn btn-main">
             Yeni Muayene Ekle
         </a>
     </div>
@@ -30,7 +42,11 @@
         </div>
     }
 
-    <form asp-controller="Muayene" asp-action="Index" method="get" class="row g-2 mb-3">
+    <form asp-controller="Muayene"
+          asp-action="Index"
+          method="get"
+          class="row g-2 mb-3">
+
         <div class="col-md-5">
             <input type="text"
                    name="arama"
@@ -54,13 +70,16 @@
         </div>
 
         <div class="col-md-1">
-            <button type="submit" class="btn btn-outline-primary w-100">
+            <button type="submit"
+                    class="btn btn-outline-primary w-100">
                 Filtrele
             </button>
         </div>
 
         <div class="col-md-2">
-            <a asp-controller="Muayene" asp-action="Index" class="btn btn-outline-secondary w-100">
+            <a asp-controller="Muayene"
+               asp-action="Index"
+               class="btn btn-outline-secondary w-100">
                 Temizle
             </a>
         </div>
@@ -76,7 +95,9 @@
                     <th>Randevu</th>
                     <th>Şikayet</th>
                     <th>Tanı</th>
-                    <th style="width: 190px;">İşlemler</th>
+                    <th style="min-width: 370px;">
+                        İşlemler
+                    </th>
                 </tr>
             </thead>
 
@@ -84,7 +105,8 @@
                 @if (Model.Count == 0)
                 {
                     <tr>
-                        <td colspan="7" class="text-center text-muted">
+                        <td colspan="7"
+                            class="text-center text-muted">
                             Kayıtlı muayene bulunamadı.
                         </td>
                     </tr>
@@ -94,38 +116,80 @@
                     foreach (var muayene in Model)
                     {
                         <tr>
-                            <td>@muayene.MuayeneTarihi.ToString("dd.MM.yyyy HH:mm")</td>
                             <td>
-                                @muayene.Hasta?.Ad @muayene.Hasta?.Soyad
-                                <br />
-                                <small class="text-muted">@muayene.Hasta?.TcKimlikNo</small>
+                                @muayene.MuayeneTarihi.ToString("dd.MM.yyyy HH:mm")
                             </td>
-                            <td>@muayene.Doktor?.Ad @muayene.Doktor?.Soyad</td>
+
+                            <td>
+                                @muayene.Hasta?.Ad
+                                @muayene.Hasta?.Soyad
+
+                                <br />
+
+                                <small class="text-muted">
+                                    @muayene.Hasta?.TcKimlikNo
+                                </small>
+                            </td>
+
+                            <td>
+                                @muayene.Doktor?.Ad
+                                @muayene.Doktor?.Soyad
+                            </td>
+
                             <td>
                                 @if (muayene.Randevu != null)
                                 {
-                                    <span>@muayene.Randevu.RandevuTarihiSaati.ToString("dd.MM.yyyy HH:mm")</span>
+                                    <span>
+                                        @muayene.Randevu.RandevuTarihiSaati.ToString("dd.MM.yyyy HH:mm")
+                                    </span>
                                 }
                                 else
                                 {
-                                    <span class="text-muted">Randevusuz</span>
+                                    <span class="text-muted">
+                                        Randevusuz
+                                    </span>
                                 }
                             </td>
-                            <td>@muayene.Sikayet</td>
-                            <td>@muayene.Tani</td>
+
+                            <td>
+                                @muayene.Sikayet
+                            </td>
+
+                            <td>
+                                @muayene.Tani
+                            </td>
+
                             <td>
                                 <a asp-controller="Muayene"
                                    asp-action="Details"
                                    asp-route-id="@muayene.MuayeneId"
-                                   class="btn btn-sm btn-info">
+                                   class="btn btn-sm btn-info mb-1">
                                     Detay
                                 </a>
+
                                 <a asp-controller="Muayene"
                                    asp-action="Edit"
                                    asp-route-id="@muayene.MuayeneId"
-                                   class="btn btn-sm btn-warning">
+                                   class="btn btn-sm btn-warning mb-1">
                                     Güncelle
                                 </a>
+
+                                @if (hizliIslemYetkisiVarMi)
+                                {
+                                    <a asp-controller="Recete"
+                                       asp-action="Create"
+                                       asp-route-muayeneId="@muayene.MuayeneId"
+                                       class="btn btn-sm btn-success mb-1">
+                                        Reçete Ekle
+                                    </a>
+
+                                    <a asp-controller="Tahlil"
+                                       asp-action="Create"
+                                       asp-route-muayeneId="@muayene.MuayeneId"
+                                       class="btn btn-sm btn-primary mb-1">
+                                        Tahlil İste
+                                    </a>
+                                }
 
                                 <form asp-controller="Muayene"
                                       asp-action="Delete"
@@ -136,7 +200,8 @@
 
                                     @Html.AntiForgeryToken()
 
-                                    <button type="submit" class="btn btn-sm btn-danger">
+                                    <button type="submit"
+                                            class="btn btn-sm btn-danger mb-1">
                                         Sil
                                     </button>
                                 </form>

@@ -1,0 +1,372 @@
+﻿@model List<HBYS.Web.ViewModels.HemsireGozlemHastaViewModel>
+
+@{
+    ViewData["Title"] = "Hemşire Gözlemleri";
+
+    bool kayitYetkisiVarMi =
+        ViewBag.KayitYetkisiVarMi == true;
+
+    bool? seciliKritikDurum =
+        ViewBag.SeciliKritikDurum as bool?;
+}
+
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3>🩺 Hemşire Gözlem Modülü</h3>
+
+            <p class="text-muted mb-0">
+                Yatan hastaların hayati bulgularını,
+                bakım notlarını ve kritik durumlarını takip et.
+            </p>
+        </div>
+
+        @if (kayitYetkisiVarMi)
+        {
+            <a asp-controller="HemsireGozlem"
+               asp-action="Create"
+               class="btn btn-main">
+                Yeni Gözlem Kaydı
+            </a>
+        }
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted">
+                        Yatan Hasta
+                    </div>
+
+                    <h2 class="mb-0">
+                        @ViewBag.AktifYatanHasta
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted">
+                        Seçili Gün Gözlem
+                    </div>
+
+                    <h2 class="text-primary mb-0">
+                        @ViewBag.GozlemSayisi
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted">
+                        Kritik Gözlem
+                    </div>
+
+                    <h2 class="text-danger mb-0">
+                        @ViewBag.KritikGozlemSayisi
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted">
+                        Gözlem Bekleyen
+                    </div>
+
+                    <h2 class="text-warning mb-0">
+                        @ViewBag.GozlemBekleyenHasta
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form asp-controller="HemsireGozlem"
+          asp-action="Index"
+          method="get"
+          class="row g-2 mb-4">
+
+        <div class="col-lg-3">
+            <input type="text"
+                   name="arama"
+                   value="@ViewBag.Arama"
+                   class="form-control"
+                   placeholder="Hasta, TC, doktor veya servis ara..." />
+        </div>
+
+        <div class="col-lg-3">
+            <select name="servisId"
+                    asp-items="ViewBag.Servisler"
+                    class="form-select">
+
+                <option value="">
+                    Tüm Servisler
+                </option>
+            </select>
+        </div>
+
+        <div class="col-lg-2">
+            <input type="date"
+                   name="tarih"
+                   value="@ViewBag.SeciliTarih"
+                   class="form-control" />
+        </div>
+
+        <div class="col-lg-2">
+            <select name="kritikDurum"
+                    class="form-select">
+
+                <option value="">
+                    Tüm Durumlar
+                </option>
+
+                @if (seciliKritikDurum == true)
+                {
+                    <option value="true"
+                            selected>
+                        Kritik
+                    </option>
+                }
+                else
+                {
+                    <option value="true">
+                        Kritik
+                    </option>
+                }
+
+                @if (seciliKritikDurum == false)
+                {
+                    <option value="false"
+                            selected>
+                        Kritik Değil
+                    </option>
+                }
+                else
+                {
+                    <option value="false">
+                        Kritik Değil
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="col-lg-1">
+            <button type="submit"
+                    class="btn btn-main w-100">
+                Ara
+            </button>
+        </div>
+
+        <div class="col-lg-1">
+            <a asp-controller="HemsireGozlem"
+               asp-action="Index"
+               class="btn btn-outline-secondary w-100">
+                Sil
+            </a>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Hasta</th>
+                    <th>Servis / Yatak</th>
+                    <th>Doktor</th>
+                    <th>Son Hayati Bulgular</th>
+                    <th>Son Gözlem</th>
+                    <th>Günlük Sayı</th>
+                    <th style="min-width: 190px;">
+                        İşlemler
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="7"
+                            class="text-center text-muted">
+                            Yatan hasta bulunamadı.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var kayit in Model)
+                    {
+                        var yatis =
+                            kayit.HastaYatis;
+
+                        var gozlem =
+                            kayit.SonGozlem;
+
+                        <tr class="@(gozlem?.KritikDurumVarMi == true ? "table-danger" : "")">
+                            <td>
+                                <strong>
+                                    @yatis.Hasta?.Ad
+                                    @yatis.Hasta?.Soyad
+                                </strong>
+
+                                <br />
+
+                                <small class="text-muted">
+                                    @yatis.Hasta?.TcKimlikNo
+                                </small>
+
+                                <br />
+
+                                <small>
+                                    Kan:
+                                    @(yatis.Hasta?.KanGrubu ?? "-")
+                                </small>
+                            </td>
+
+                            <td>
+                                <strong>
+                                    @yatis.Yatak?.Oda?.Servis?.ServisAdi
+                                </strong>
+
+                                <br />
+
+                                Oda:
+                                @yatis.Yatak?.Oda?.OdaNo
+
+                                <br />
+
+                                Yatak:
+                                @yatis.Yatak?.YatakNo
+                            </td>
+
+                            <td>
+                                @yatis.Doktor?.Unvan
+                                @yatis.Doktor?.Ad
+                                @yatis.Doktor?.Soyad
+                            </td>
+
+                            <td>
+                                @if (gozlem == null)
+                                {
+                                    <span class="text-muted">
+                                        Gözlem girilmedi
+                                    </span>
+                                }
+                                else
+                                {
+                                    <small>
+                                        Ateş:
+                                        @(gozlem.Ates?.ToString("0.0") ?? "-")
+                                        °C
+                                    </small>
+
+                                    <br />
+
+                                    <small>
+                                        Nabız:
+                                        @(gozlem.Nabiz?.ToString() ?? "-")
+                                    </small>
+
+                                    <br />
+
+                                    <small>
+                                        Tansiyon:
+                                        @(gozlem.TansiyonSistolik?.ToString() ?? "-")
+                                        /
+                                        @(gozlem.TansiyonDiastolik?.ToString() ?? "-")
+                                    </small>
+
+                                    <br />
+
+                                    <small>
+                                        Oksijen:
+                                        @(gozlem.OksijenSaturasyonu?.ToString() ?? "-")
+                                        %
+                                    </small>
+                                }
+                            </td>
+
+                            <td>
+                                @if (gozlem == null)
+                                {
+                                    <span class="badge bg-warning text-dark">
+                                        Gözlem Bekliyor
+                                    </span>
+                                }
+                                else
+                                {
+                                    <strong>
+                                        @gozlem.GozlemTarihi.ToString(
+                                            "HH:mm"
+                                        )
+                                    </strong>
+
+                                    <br />
+
+                                    <small class="text-muted">
+                                        @gozlem.KaydedenKullanici?.AdSoyad
+                                    </small>
+
+                                    <br />
+
+                                    @if (gozlem.KritikDurumVarMi)
+                                    {
+                                        <span class="badge bg-danger mt-1">
+                                            Kritik Durum
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success mt-1">
+                                            Normal Takip
+                                        </span>
+                                    }
+                                }
+                            </td>
+
+                            <td>
+                                <span class="badge bg-primary fs-6">
+                                    @kayit.SeciliGunGozlemSayisi
+                                </span>
+                            </td>
+
+                            <td>
+                                @if (kayitYetkisiVarMi)
+                                {
+                                    <a asp-controller="HemsireGozlem"
+                                       asp-action="Create"
+                                       asp-route-hastaYatisId="@yatis.HastaYatisId"
+                                       class="btn btn-sm btn-success mb-1">
+                                        Gözlem Ekle
+                                    </a>
+                                }
+
+                                <a asp-controller="HemsireGozlem"
+                                   asp-action="Gecmis"
+                                   asp-route-hastaYatisId="@yatis.HastaYatisId"
+                                   class="btn btn-sm btn-info mb-1">
+                                    Geçmiş
+                                </a>
+
+                                <a asp-controller="HastaYatis"
+                                   asp-action="Details"
+                                   asp-route-id="@yatis.HastaYatisId"
+                                   class="btn btn-sm btn-outline-secondary mb-1">
+                                    Yatış Detayı
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

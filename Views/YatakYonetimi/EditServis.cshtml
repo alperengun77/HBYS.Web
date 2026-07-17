@@ -1,0 +1,87 @@
+﻿@model HBYS.Web.Models.Servis
+
+@{
+    ViewData["Title"] = "Servis Güncelle";
+}
+
+<div class="page-card">
+    <h3>Servis Güncelle</h3>
+
+    <p class="text-muted">
+        Seçili servisin adını, kat bilgisini
+        ve açıklamasını güncelle.
+    </p>
+
+    <form asp-controller="YatakYonetimi"
+          asp-action="EditServis"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+        <input type="hidden"
+               asp-for="ServisId" />
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-3">
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="ServisAdi"
+                       class="form-label">
+                    Servis Adı
+                </label>
+
+                <input asp-for="ServisAdi"
+                       class="form-control" />
+
+                <span asp-validation-for="ServisAdi"
+                      class="text-danger">
+                </span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Kat"
+                       class="form-label">
+                    Kat / Konum
+                </label>
+
+                <input asp-for="Kat"
+                       class="form-control" />
+
+                <span asp-validation-for="Kat"
+                      class="text-danger">
+                </span>
+            </div>
+
+            <div class="col-md-12">
+                <label asp-for="Aciklama"
+                       class="form-label">
+                    Açıklama
+                </label>
+
+                <textarea asp-for="Aciklama"
+                          class="form-control"
+                          rows="4">
+                </textarea>
+
+                <span asp-validation-for="Aciklama"
+                      class="text-danger">
+                </span>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit"
+                    class="btn btn-main">
+                Güncelle
+            </button>
+
+            <a asp-controller="YatakYonetimi"
+               asp-action="Index"
+               class="btn btn-secondary">
+                Geri Dön
+            </a>
+        </div>
+    </form>
+</div>

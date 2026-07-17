@@ -8,10 +8,15 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
             <h3>Doktor İşlemleri</h3>
-            <p class="text-muted mb-0">Doktor kayıtlarını listele, ara, ekle, güncelle ve sil.</p>
+
+            <p class="text-muted mb-0">
+                Doktor kayıtlarını listele, ara, ekle, güncelle ve sil.
+            </p>
         </div>
 
-        <a asp-controller="Doktor" asp-action="Create" class="btn btn-main">
+        <a asp-controller="Doktor"
+           asp-action="Create"
+           class="btn btn-main">
             Yeni Doktor Ekle
         </a>
     </div>
@@ -30,17 +35,24 @@
         </div>
     }
 
-    <form asp-controller="Doktor" asp-action="Index" method="get" class="row g-2 mb-3">
+    <form asp-controller="Doktor"
+          asp-action="Index"
+          method="get"
+          class="row g-2 mb-3">
+
         <div class="col-md-10">
             <input type="text"
                    name="arama"
                    value="@ViewBag.Arama"
                    class="form-control"
-                   placeholder="Sicil no, ad, soyad, unvan veya poliklinik ile ara..." />
+                   placeholder="TC kimlik no, ad, soyad, unvan veya poliklinik ile ara..." />
         </div>
 
         <div class="col-md-2">
-            <button type="submit" class="btn btn-outline-primary w-100">Ara</button>
+            <button type="submit"
+                    class="btn btn-outline-primary w-100">
+                Ara
+            </button>
         </div>
     </form>
 
@@ -48,14 +60,16 @@
         <table class="table table-bordered table-hover align-middle">
             <thead>
                 <tr>
-                    <th>Sicil No</th>
+                    <th>TC Kimlik No</th>
                     <th>Ad Soyad</th>
                     <th>Unvan</th>
                     <th>Poliklinik</th>
                     <th>Telefon</th>
                     <th>E-posta</th>
                     <th>Kayıt Tarihi</th>
-                    <th style="width: 190px;">İşlemler</th>
+                    <th style="width: 190px;">
+                        İşlemler
+                    </th>
                 </tr>
             </thead>
 
@@ -63,7 +77,8 @@
                 @if (Model.Count == 0)
                 {
                     <tr>
-                        <td colspan="8" class="text-center text-muted">
+                        <td colspan="8"
+                            class="text-center text-muted">
                             Kayıtlı doktor bulunamadı.
                         </td>
                     </tr>
@@ -73,13 +88,34 @@
                     foreach (var doktor in Model)
                     {
                         <tr>
-                            <td>@doktor.SicilNo</td>
-                            <td>@doktor.Ad @doktor.Soyad</td>
-                            <td>@doktor.Unvan</td>
-                            <td>@doktor.Poliklinik?.PoliklinikAdi</td>
-                            <td>@doktor.Telefon</td>
-                            <td>@doktor.Eposta</td>
-                            <td>@doktor.KayitTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>
+                                @doktor.TcKimlikNo
+                            </td>
+
+                            <td>
+                                @doktor.Ad @doktor.Soyad
+                            </td>
+
+                            <td>
+                                @doktor.Unvan
+                            </td>
+
+                            <td>
+                                @doktor.Poliklinik?.PoliklinikAdi
+                            </td>
+
+                            <td>
+                                @doktor.Telefon
+                            </td>
+
+                            <td>
+                                @doktor.Eposta
+                            </td>
+
+                            <td>
+                                @doktor.KayitTarihi.ToString("dd.MM.yyyy HH:mm")
+                            </td>
+
                             <td>
                                 <a asp-controller="Doktor"
                                    asp-action="Details"
@@ -87,6 +123,7 @@
                                    class="btn btn-sm btn-info">
                                     Detay
                                 </a>
+
                                 <a asp-controller="Doktor"
                                    asp-action="Edit"
                                    asp-route-id="@doktor.DoktorId"
@@ -103,7 +140,8 @@
 
                                     @Html.AntiForgeryToken()
 
-                                    <button type="submit" class="btn btn-sm btn-danger">
+                                    <button type="submit"
+                                            class="btn btn-sm btn-danger">
                                         Sil
                                     </button>
                                 </form>

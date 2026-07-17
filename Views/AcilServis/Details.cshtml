@@ -1,0 +1,311 @@
+﻿@model HBYS.Web.Models.AcilBasvuru
+
+@{
+    ViewData["Title"] = "Acil Başvuru Detayı";
+
+    string triyajSinifi =
+        Model.TriyajSeviyesi switch
+        {
+            "Kırmızı" =>
+                "bg-danger",
+
+            "Sarı" =>
+                "bg-warning text-dark",
+
+            "Yeşil" =>
+                "bg-success",
+
+            "Siyah" =>
+                "bg-dark",
+
+            _ =>
+                "bg-secondary"
+        };
+}
+
+<div class="print-header">
+    <h2>HBYS Web</h2>
+    <h4>Acil Servis Başvuru Formu</h4>
+
+    <p>
+        Yazdırma Tarihi:
+        @DateTime.Now.ToString("dd.MM.yyyy HH:mm")
+    </p>
+</div>
+
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3>🚑 Acil Başvuru Detayı</h3>
+
+            <p class="text-muted mb-0">
+                Başvuru No:
+                <strong>
+                    @Model.AcilBasvuruId
+                </strong>
+            </p>
+        </div>
+
+        <div class="no-print d-flex gap-2">
+            <button type="button"
+                    onclick="window.print()"
+                    class="btn btn-main">
+                Yazdır
+            </button>
+
+            <a asp-controller="AcilServis"
+               asp-action="Edit"
+               asp-route-id="@Model.AcilBasvuruId"
+               class="btn btn-warning">
+                Güncelle
+            </a>
+
+            <a asp-controller="AcilServis"
+               asp-action="Index"
+               class="btn btn-secondary">
+                Geri Dön
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5>Başvuru Bilgileri</h5>
+                    <hr />
+
+                    <p>
+                        <strong>Başvuru Tarihi:</strong>
+                        @Model.BasvuruTarihi.ToString("dd.MM.yyyy HH:mm")
+                    </p>
+
+                    <p>
+                        <strong>Geliş Şekli:</strong>
+                        @Model.GelisSekli
+                    </p>
+
+                    <p>
+                        <strong>Triyaj:</strong>
+
+                        <span class="badge @triyajSinifi fs-6">
+                            @Model.TriyajSeviyesi
+                        </span>
+                    </p>
+
+                    <p>
+                        <strong>Durum:</strong>
+                        @Model.Durum
+                    </p>
+
+                    <p>
+                        <strong>Şikâyet:</strong>
+                        @Model.Sikayet
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5>Hasta Bilgileri</h5>
+                    <hr />
+
+                    <p>
+                        <strong>Hasta:</strong>
+                        @Model.Hasta?.Ad
+                        @Model.Hasta?.Soyad
+                    </p>
+
+                    <p>
+                        <strong>TC Kimlik No:</strong>
+                        @Model.Hasta?.TcKimlikNo
+                    </p>
+
+                    <p>
+                        <strong>Doğum Tarihi:</strong>
+                        @Model.Hasta?.DogumTarihi.ToString("dd.MM.yyyy")
+                    </p>
+
+                    <p>
+                        <strong>Kan Grubu:</strong>
+                        @Model.Hasta?.KanGrubu
+                    </p>
+
+                    <p>
+                        <strong>Telefon:</strong>
+                        @Model.Hasta?.Telefon
+                    </p>
+
+                    @if (Model.Hasta != null)
+                    {
+                        <a asp-controller="Hasta"
+                           asp-action="Details"
+                           asp-route-id="@Model.Hasta.HastaId"
+                           class="btn btn-sm btn-info no-print">
+                            Hasta Detayına Git
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5>Doktor Bilgileri</h5>
+                    <hr />
+
+                    @if (Model.Doktor == null)
+                    {
+                        <div class="alert alert-warning">
+                            Henüz doktor atanmadı.
+                        </div>
+                    }
+                    else
+                    {
+                        <p>
+                            <strong>Doktor:</strong>
+                            @Model.Doktor.Unvan
+                            @Model.Doktor.Ad
+                            @Model.Doktor.Soyad
+                        </p>
+
+                        <p>
+                            <strong>TC Kimlik No:</strong>
+                            @Model.Doktor.TcKimlikNo
+                        </p>
+
+                        <p>
+                            <strong>Poliklinik:</strong>
+                            @Model.Doktor.Poliklinik?.PoliklinikAdi
+                        </p>
+
+                        <p>
+                            <strong>Telefon:</strong>
+                            @Model.Doktor.Telefon
+                        </p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mt-1">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5>Hayati Bulgular</h5>
+                    <hr />
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p>
+                                <strong>Ateş:</strong>
+                                @(Model.Ates?.ToString("0.0") ?? "-")
+                                °C
+                            </p>
+
+                            <p>
+                                <strong>Nabız:</strong>
+                                @(Model.Nabiz?.ToString() ?? "-")
+                                /dk
+                            </p>
+
+                            <p>
+                                <strong>Solunum:</strong>
+                                @(Model.SolunumSayisi?.ToString() ?? "-")
+                                /dk
+                            </p>
+                        </div>
+
+                        <div class="col-md-6">
+                            <p>
+                                <strong>Tansiyon:</strong>
+
+                                @if (
+                                    Model.TansiyonSistolik.HasValue ||
+                                    Model.TansiyonDiastolik.HasValue
+                                )
+                                {
+                                    <span>
+                                        @(Model.TansiyonSistolik?.ToString() ?? "-")
+                                        /
+                                        @(Model.TansiyonDiastolik?.ToString() ?? "-")
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span>-</span>
+                                }
+                            </p>
+
+                            <p>
+                                <strong>Oksijen:</strong>
+                                @(Model.OksijenSaturasyonu?.ToString() ?? "-")
+                                %
+                            </p>
+
+                            <p>
+                                <strong>Bilinç:</strong>
+                                @(Model.BilincDurumu ?? "-")
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5>Müdahale ve Sonuç</h5>
+                    <hr />
+
+                    <p>
+                        <strong>Müdahale Notu:</strong>
+                    </p>
+
+                    <div class="border rounded p-3 bg-light mb-3">
+                        @if (
+                            string.IsNullOrWhiteSpace(
+                                Model.MudahaleNotu
+                            )
+                        )
+                        {
+                            <span class="text-muted">
+                                Müdahale notu girilmedi.
+                            </span>
+                        }
+                        else
+                        {
+                            @Model.MudahaleNotu
+                        }
+                    </div>
+
+                    <p>
+                        <strong>Sonuç:</strong>
+                    </p>
+
+                    <div class="border rounded p-3 bg-light">
+                        @if (
+                            string.IsNullOrWhiteSpace(
+                                Model.Sonuc
+                            )
+                        )
+                        {
+                            <span class="text-muted">
+                                Sonuç bilgisi girilmedi.
+                            </span>
+                        }
+                        else
+                        {
+                            @Model.Sonuc
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

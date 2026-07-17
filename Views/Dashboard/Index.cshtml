@@ -3,10 +3,17 @@
 @{
     ViewData["Title"] = "Dashboard";
 
-    var sonRandevular = ViewBag.SonRandevular as List<Randevu>;
-    var sonMuayeneler = ViewBag.SonMuayeneler as List<Muayene>;
-    var sonReceteler = ViewBag.SonReceteler as List<Recete>;
-    var sonTahliller = ViewBag.SonTahliller as List<Tahlil>;
+    var gununRandevulari =
+        ViewBag.GununRandevulari as List<Randevu>;
+
+    var gununMuayeneleri =
+        ViewBag.GununMuayeneleri as List<Muayene>;
+
+    var gununReceteleri =
+        ViewBag.GununReceteleri as List<Recete>;
+
+    var gununTahlilleri =
+        ViewBag.GununTahlilleri as List<Tahlil>;
 
     bool adminMi = ViewBag.AdminMi == true;
     bool doktorMu = ViewBag.DoktorMu == true;
@@ -15,23 +22,61 @@
     bool eczaneMi = ViewBag.EczaneMi == true;
     bool yoneticiMi = ViewBag.YoneticiMi == true;
 
-    bool canHasta = adminMi || yoneticiMi || sekreterMi || doktorMu || laborantMi || eczaneMi;
-    bool canDoktor = adminMi || yoneticiMi || sekreterMi || doktorMu;
-    bool canPoliklinik = adminMi || yoneticiMi || sekreterMi || doktorMu;
-    bool canRandevu = adminMi || yoneticiMi || sekreterMi || doktorMu;
-    bool canMuayene = adminMi || yoneticiMi || doktorMu;
-    bool canRecete = adminMi || yoneticiMi || doktorMu || eczaneMi;
-    bool canTahlil = adminMi || yoneticiMi || doktorMu || laborantMi;
+    bool canHasta =
+        adminMi ||
+        yoneticiMi ||
+        sekreterMi ||
+        doktorMu ||
+        laborantMi ||
+        eczaneMi;
+
+    bool canDoktor =
+        adminMi ||
+        yoneticiMi ||
+        sekreterMi ||
+        doktorMu;
+
+    bool canPoliklinik =
+        adminMi ||
+        yoneticiMi ||
+        sekreterMi ||
+        doktorMu;
+
+    bool canRandevu =
+        adminMi ||
+        yoneticiMi ||
+        sekreterMi ||
+        doktorMu;
+
+    bool canMuayene =
+        adminMi ||
+        yoneticiMi ||
+        doktorMu;
+
+    bool canRecete =
+        adminMi ||
+        yoneticiMi ||
+        doktorMu ||
+        eczaneMi;
+
+    bool canTahlil =
+        adminMi ||
+        yoneticiMi ||
+        doktorMu ||
+        laborantMi;
 }
 
 <div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col-md-8">
+    <div class="row mb-4 align-items-center">
+        <div class="col-lg-7">
             <h2>@ViewBag.DashboardBaslik</h2>
 
             <p class="text-muted mb-1">
-                Hoş geldiniz, <strong>@ViewBag.AdSoyad</strong> |
-                Yetki: <strong>@ViewBag.YetkiAdi</strong>
+                Hoş geldiniz,
+                <strong>@ViewBag.AdSoyad</strong>
+                |
+                Yetki:
+                <strong>@ViewBag.YetkiAdi</strong>
             </p>
 
             <p class="text-muted mb-0">
@@ -39,10 +84,69 @@
             </p>
         </div>
 
-        <div class="col-md-4 text-end">
-            <span class="badge bg-primary fs-6">
-                @DateTime.Now.ToString("dd.MM.yyyy HH:mm")
-            </span>
+        <div class="col-lg-5 mt-3 mt-lg-0">
+            <form asp-controller="Dashboard"
+                  asp-action="Index"
+                  method="get"
+                  class="row g-2 justify-content-lg-end">
+
+                <div class="col-sm-7">
+                    <label for="dashboardTarih"
+                           class="form-label mb-1">
+                        Görüntülenecek Gün
+                    </label>
+
+                    <input type="date"
+                           id="dashboardTarih"
+                           name="tarih"
+                           value="@ViewBag.SeciliTarih"
+                           class="form-control" />
+                </div>
+
+                <div class="col-sm-5 d-flex align-items-end">
+                    <button type="submit"
+                            class="btn btn-main w-100">
+                        Günü Göster
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="page-card mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <span class="text-muted">
+                    Görüntülenen tarih:
+                </span>
+
+                <strong class="ms-1">
+                    @ViewBag.SeciliTarihYazi
+                </strong>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2">
+                <a asp-controller="Dashboard"
+                   asp-action="Index"
+                   asp-route-tarih="@ViewBag.OncekiGun"
+                   class="btn btn-outline-secondary btn-sm">
+                    Önceki Gün
+                </a>
+
+                <a asp-controller="Dashboard"
+                   asp-action="Index"
+                   asp-route-tarih="@ViewBag.Bugun"
+                   class="btn btn-outline-primary btn-sm">
+                    Bugün
+                </a>
+
+                <a asp-controller="Dashboard"
+                   asp-action="Index"
+                   asp-route-tarih="@ViewBag.SonrakiGun"
+                   class="btn btn-outline-secondary btn-sm">
+                    Sonraki Gün
+                </a>
+            </div>
         </div>
     </div>
 
@@ -56,15 +160,23 @@
     <div class="row g-3">
         @if (canHasta)
         {
-            <div class="col-md-3">
+            <div class="col-md-6 col-xl-3">
                 <div class="card shadow-sm border-0 h-100">
                     <div class="card-body">
                         <h6 class="text-muted">
-                            @(doktorMu || laborantMi || eczaneMi ? "İlgili Hasta" : "Hasta Sayısı")
+                            Günün Hasta Sayısı
                         </h6>
+
                         <h2>@ViewBag.HastaSayisi</h2>
+
                         <p class="mb-0">
-                            @(doktorMu ? "Size bağlı hastalar" : "Aktif hasta kayıtları")
+                            @(doktorMu
+                                ? "Size bağlı günlük hastalar"
+                                : laborantMi
+                                    ? "Tahlil işlemi olan hastalar"
+                                    : eczaneMi
+                                        ? "Reçete işlemi olan hastalar"
+                                        : "Seçilen gün işlem gören hastalar")
                         </p>
                     </div>
                 </div>
@@ -73,15 +185,21 @@
 
         @if (canDoktor)
         {
-            <div class="col-md-3">
+            <div class="col-md-6 col-xl-3">
                 <div class="card shadow-sm border-0 h-100">
                     <div class="card-body">
                         <h6 class="text-muted">
-                            @(doktorMu ? "Doktor Kaydınız" : "Doktor Sayısı")
+                            @(doktorMu
+                                ? "Doktor Kaydınız"
+                                : "Görevli Doktor Sayısı")
                         </h6>
+
                         <h2>@ViewBag.DoktorSayisi</h2>
+
                         <p class="mb-0">
-                            @(doktorMu ? "Bağlı doktor hesabı" : "Aktif doktor kayıtları")
+                            @(doktorMu
+                                ? "Hesabınıza bağlı doktor kaydı"
+                                : "Seçilen gün işlem yapan doktorlar")
                         </p>
                     </div>
                 </div>
@@ -90,15 +208,17 @@
 
         @if (canPoliklinik)
         {
-            <div class="col-md-3">
+            <div class="col-md-6 col-xl-3">
                 <div class="card shadow-sm border-0 h-100">
                     <div class="card-body">
                         <h6 class="text-muted">
-                            @(doktorMu ? "Bağlı Poliklinik" : "Poliklinik Sayısı")
+                            Kullanılan Poliklinik
                         </h6>
+
                         <h2>@ViewBag.PoliklinikSayisi</h2>
+
                         <p class="mb-0">
-                            @(doktorMu ? "Doktorun bağlı olduğu bölüm" : "Aktif poliklinikler")
+                            Seçilen gün randevu bulunan bölümler
                         </p>
                     </div>
                 </div>
@@ -107,13 +227,19 @@
 
         @if (canRandevu)
         {
-            <div class="col-md-3">
+            <div class="col-md-6 col-xl-3">
                 <div class="card shadow-sm border-0 h-100">
                     <div class="card-body">
-                        <h6 class="text-muted">Toplam Randevu</h6>
+                        <h6 class="text-muted">
+                            Günün Randevusu
+                        </h6>
+
                         <h2>@ViewBag.RandevuSayisi</h2>
+
                         <p class="mb-0">
-                            @(doktorMu ? "Size ait randevular" : "Aktif randevu kayıtları")
+                            @(doktorMu
+                                ? "Yalnızca size ait randevular"
+                                : "Seçilen güne ait randevular")
                         </p>
                     </div>
                 </div>
@@ -121,55 +247,58 @@
         }
     </div>
 
-    <div class="row g-3 mt-1">
-        @if (canRandevu)
-        {
-            <div class="col-md-3">
+    @if (canRandevu)
+    {
+        <div class="row g-3 mt-1">
+            <div class="col-md-4">
                 <div class="card shadow-sm border-0 h-100">
                     <div class="card-body">
-                        <h6 class="text-muted">Bugünkü Randevu</h6>
-                        <h2>@ViewBag.BugunRandevuSayisi</h2>
-                        <p class="mb-0">Bugüne ait randevular</p>
-                    </div>
-                </div>
-            </div>
+                        <h6 class="text-muted">
+                            Bekleyen Randevu
+                        </h6>
 
-            <div class="col-md-3">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-body">
-                        <h6 class="text-muted">Bekleyen Randevu</h6>
                         <h2>@ViewBag.BekleyenRandevuSayisi</h2>
-                        <p class="mb-0">Henüz tamamlanmamış</p>
-                    </div>
-                </div>
-            </div>
 
-            <div class="col-md-3">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-body">
-                        <h6 class="text-muted">Tamamlanan Randevu</h6>
-                        <h2>@ViewBag.TamamlananRandevuSayisi</h2>
-                        <p class="mb-0">Tamamlanan kayıtlar</p>
-                    </div>
-                </div>
-            </div>
-        }
-
-        @if (canMuayene)
-        {
-            <div class="col-md-3">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-body">
-                        <h6 class="text-muted">Muayene Sayısı</h6>
-                        <h2>@ViewBag.MuayeneSayisi</h2>
                         <p class="mb-0">
-                            @(doktorMu ? "Size ait muayeneler" : "Aktif muayene kayıtları")
+                            Seçilen gün bekleyen kayıtlar
                         </p>
                     </div>
                 </div>
             </div>
-        }
-    </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body">
+                        <h6 class="text-muted">
+                            Tamamlanan Randevu
+                        </h6>
+
+                        <h2>@ViewBag.TamamlananRandevuSayisi</h2>
+
+                        <p class="mb-0">
+                            Muayenesi tamamlanan kayıtlar
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body">
+                        <h6 class="text-muted">
+                            İptal Edilen Randevu
+                        </h6>
+
+                        <h2>@ViewBag.IptalRandevuSayisi</h2>
+
+                        <p class="mb-0">
+                            Seçilen gün iptal edilen kayıtlar
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 
     <div class="row g-3 mt-1">
         @if (canMuayene)
@@ -177,9 +306,17 @@
             <div class="col-md-4">
                 <div class="card shadow-sm border-0 h-100">
                     <div class="card-body">
-                        <h6 class="text-muted">Bugünkü Muayene</h6>
-                        <h2>@ViewBag.BugunMuayeneSayisi</h2>
-                        <p class="mb-0">Bugün yapılan muayeneler</p>
+                        <h6 class="text-muted">
+                            Günün Muayenesi
+                        </h6>
+
+                        <h2>@ViewBag.MuayeneSayisi</h2>
+
+                        <p class="mb-0">
+                            @(doktorMu
+                                ? "Yalnızca sizin muayeneleriniz"
+                                : "Seçilen gün yapılan muayeneler")
+                        </p>
                     </div>
                 </div>
             </div>
@@ -190,10 +327,16 @@
             <div class="col-md-4">
                 <div class="card shadow-sm border-0 h-100">
                     <div class="card-body">
-                        <h6 class="text-muted">Reçete Sayısı</h6>
+                        <h6 class="text-muted">
+                            Günün Reçetesi
+                        </h6>
+
                         <h2>@ViewBag.ReceteSayisi</h2>
+
                         <p class="mb-0">
-                            @(doktorMu ? "Size bağlı reçeteler" : "Aktif reçete kayıtları")
+                            @(doktorMu
+                                ? "Sizin muayenelerinize bağlı reçeteler"
+                                : "Seçilen gün oluşturulan reçeteler")
                         </p>
                     </div>
                 </div>
@@ -205,10 +348,16 @@
             <div class="col-md-4">
                 <div class="card shadow-sm border-0 h-100">
                     <div class="card-body">
-                        <h6 class="text-muted">Tahlil Sayısı</h6>
+                        <h6 class="text-muted">
+                            Günün Tahlili
+                        </h6>
+
                         <h2>@ViewBag.TahlilSayisi</h2>
+
                         <p class="mb-0">
-                            @(doktorMu ? "Size bağlı tahliller" : "Aktif tahlil kayıtları")
+                            @(doktorMu
+                                ? "Sizin muayenelerinize bağlı tahliller"
+                                : "Seçilen gün istenen tahliller")
                         </p>
                     </div>
                 </div>
@@ -222,9 +371,15 @@
             <div class="col-md-4">
                 <div class="card shadow-sm border-0 h-100">
                     <div class="card-body">
-                        <h6 class="text-muted">Bekleyen Tahlil</h6>
+                        <h6 class="text-muted">
+                            Bekleyen Tahlil
+                        </h6>
+
                         <h2>@ViewBag.BekleyenTahlilSayisi</h2>
-                        <p class="mb-0">Sonuçlanmamış tahliller</p>
+
+                        <p class="mb-0">
+                            Seçilen gün henüz sonuçlanmayan tahliller
+                        </p>
                     </div>
                 </div>
             </div>
@@ -239,7 +394,9 @@
             @if (adminMi || sekreterMi || doktorMu)
             {
                 <div class="col-md-3">
-                    <a asp-controller="Hasta" asp-action="Index" class="btn btn-outline-primary w-100">
+                    <a asp-controller="Hasta"
+                       asp-action="Index"
+                       class="btn btn-outline-primary w-100">
                         Hasta İşlemleri
                     </a>
                 </div>
@@ -248,7 +405,9 @@
             @if (adminMi || sekreterMi || yoneticiMi)
             {
                 <div class="col-md-3">
-                    <a asp-controller="Doktor" asp-action="Index" class="btn btn-outline-primary w-100">
+                    <a asp-controller="Doktor"
+                       asp-action="Index"
+                       class="btn btn-outline-primary w-100">
                         Doktor İşlemleri
                     </a>
                 </div>
@@ -257,7 +416,9 @@
             @if (adminMi || yoneticiMi)
             {
                 <div class="col-md-3">
-                    <a asp-controller="Poliklinik" asp-action="Index" class="btn btn-outline-primary w-100">
+                    <a asp-controller="Poliklinik"
+                       asp-action="Index"
+                       class="btn btn-outline-primary w-100">
                         Poliklinik İşlemleri
                     </a>
                 </div>
@@ -266,7 +427,9 @@
             @if (adminMi || sekreterMi || doktorMu)
             {
                 <div class="col-md-3">
-                    <a asp-controller="Randevu" asp-action="Index" class="btn btn-outline-primary w-100">
+                    <a asp-controller="Randevu"
+                       asp-action="Index"
+                       class="btn btn-outline-primary w-100">
                         Randevu İşlemleri
                     </a>
                 </div>
@@ -275,7 +438,9 @@
             @if (adminMi || doktorMu)
             {
                 <div class="col-md-3">
-                    <a asp-controller="Muayene" asp-action="Index" class="btn btn-outline-success w-100">
+                    <a asp-controller="Muayene"
+                       asp-action="Index"
+                       class="btn btn-outline-success w-100">
                         Muayene İşlemleri
                     </a>
                 </div>
@@ -284,7 +449,9 @@
             @if (adminMi || doktorMu || eczaneMi)
             {
                 <div class="col-md-3">
-                    <a asp-controller="Recete" asp-action="Index" class="btn btn-outline-success w-100">
+                    <a asp-controller="Recete"
+                       asp-action="Index"
+                       class="btn btn-outline-success w-100">
                         Reçete İşlemleri
                     </a>
                 </div>
@@ -293,16 +460,25 @@
             @if (adminMi || doktorMu || laborantMi)
             {
                 <div class="col-md-3">
-                    <a asp-controller="Tahlil" asp-action="Index" class="btn btn-outline-success w-100">
+                    <a asp-controller="Tahlil"
+                       asp-action="Index"
+                       class="btn btn-outline-success w-100">
                         Tahlil İşlemleri
                     </a>
                 </div>
             }
 
-            @if (adminMi || yoneticiMi || sekreterMi || doktorMu)
+            @if (
+                adminMi ||
+                yoneticiMi ||
+                sekreterMi ||
+                doktorMu
+            )
             {
                 <div class="col-md-3">
-                    <a asp-controller="Rapor" asp-action="Index" class="btn btn-outline-dark w-100">
+                    <a asp-controller="Rapor"
+                       asp-action="Index"
+                       class="btn btn-outline-dark w-100">
                         Raporlar
                     </a>
                 </div>
@@ -313,14 +489,16 @@
     @if (canRandevu)
     {
         <div class="page-card mt-4">
-            <h5>@(doktorMu ? "Size Ait Son Randevular" : "Son Randevular")</h5>
+            <h5>
+                @ViewBag.SeciliTarihYazi Tarihli Randevular
+            </h5>
             <hr />
 
             <div class="table-responsive">
                 <table class="table table-bordered table-hover align-middle">
                     <thead>
                         <tr>
-                            <th>Tarih</th>
+                            <th>Saat</th>
                             <th>Hasta</th>
                             <th>Doktor</th>
                             <th>Poliklinik</th>
@@ -329,23 +507,41 @@
                     </thead>
 
                     <tbody>
-                        @if (sonRandevular == null || sonRandevular.Count == 0)
+                        @if (
+                            gununRandevulari == null ||
+                            gununRandevulari.Count == 0
+                        )
                         {
                             <tr>
-                                <td colspan="5" class="text-center text-muted">
-                                    Randevu bulunamadı.
+                                <td colspan="5"
+                                    class="text-center text-muted">
+                                    Seçilen gün için randevu bulunamadı.
                                 </td>
                             </tr>
                         }
                         else
                         {
-                            foreach (var randevu in sonRandevular)
+                            foreach (var randevu in gununRandevulari)
                             {
                                 <tr>
-                                    <td>@randevu.RandevuTarihiSaati.ToString("dd.MM.yyyy HH:mm")</td>
-                                    <td>@randevu.Hasta?.Ad @randevu.Hasta?.Soyad</td>
-                                    <td>@randevu.Doktor?.Ad @randevu.Doktor?.Soyad</td>
-                                    <td>@randevu.Poliklinik?.PoliklinikAdi</td>
+                                    <td>
+                                        @randevu.RandevuTarihiSaati.ToString("HH:mm")
+                                    </td>
+
+                                    <td>
+                                        @randevu.Hasta?.Ad
+                                        @randevu.Hasta?.Soyad
+                                    </td>
+
+                                    <td>
+                                        @randevu.Doktor?.Ad
+                                        @randevu.Doktor?.Soyad
+                                    </td>
+
+                                    <td>
+                                        @randevu.Poliklinik?.PoliklinikAdi
+                                    </td>
+
                                     <td>@randevu.Durum</td>
                                 </tr>
                             }
@@ -359,14 +555,16 @@
     @if (canMuayene)
     {
         <div class="page-card mt-4">
-            <h5>@(doktorMu ? "Size Ait Son Muayeneler" : "Son Muayeneler")</h5>
+            <h5>
+                @ViewBag.SeciliTarihYazi Tarihli Muayeneler
+            </h5>
             <hr />
 
             <div class="table-responsive">
                 <table class="table table-bordered table-hover align-middle">
                     <thead>
                         <tr>
-                            <th>Tarih</th>
+                            <th>Saat</th>
                             <th>Hasta</th>
                             <th>Doktor</th>
                             <th>Tanı</th>
@@ -374,22 +572,37 @@
                     </thead>
 
                     <tbody>
-                        @if (sonMuayeneler == null || sonMuayeneler.Count == 0)
+                        @if (
+                            gununMuayeneleri == null ||
+                            gununMuayeneleri.Count == 0
+                        )
                         {
                             <tr>
-                                <td colspan="4" class="text-center text-muted">
-                                    Muayene bulunamadı.
+                                <td colspan="4"
+                                    class="text-center text-muted">
+                                    Seçilen gün için muayene bulunamadı.
                                 </td>
                             </tr>
                         }
                         else
                         {
-                            foreach (var muayene in sonMuayeneler)
+                            foreach (var muayene in gununMuayeneleri)
                             {
                                 <tr>
-                                    <td>@muayene.MuayeneTarihi.ToString("dd.MM.yyyy HH:mm")</td>
-                                    <td>@muayene.Hasta?.Ad @muayene.Hasta?.Soyad</td>
-                                    <td>@muayene.Doktor?.Ad @muayene.Doktor?.Soyad</td>
+                                    <td>
+                                        @muayene.MuayeneTarihi.ToString("HH:mm")
+                                    </td>
+
+                                    <td>
+                                        @muayene.Hasta?.Ad
+                                        @muayene.Hasta?.Soyad
+                                    </td>
+
+                                    <td>
+                                        @muayene.Doktor?.Ad
+                                        @muayene.Doktor?.Soyad
+                                    </td>
+
                                     <td>@muayene.Tani</td>
                                 </tr>
                             }
@@ -403,14 +616,16 @@
     @if (canRecete)
     {
         <div class="page-card mt-4">
-            <h5>@(doktorMu ? "Size Bağlı Son Reçeteler" : "Son Reçeteler")</h5>
+            <h5>
+                @ViewBag.SeciliTarihYazi Tarihli Reçeteler
+            </h5>
             <hr />
 
             <div class="table-responsive">
                 <table class="table table-bordered table-hover align-middle">
                     <thead>
                         <tr>
-                            <th>Tarih</th>
+                            <th>Saat</th>
                             <th>Hasta</th>
                             <th>Doktor</th>
                             <th>İlaç</th>
@@ -419,22 +634,37 @@
                     </thead>
 
                     <tbody>
-                        @if (sonReceteler == null || sonReceteler.Count == 0)
+                        @if (
+                            gununReceteleri == null ||
+                            gununReceteleri.Count == 0
+                        )
                         {
                             <tr>
-                                <td colspan="5" class="text-center text-muted">
-                                    Reçete bulunamadı.
+                                <td colspan="5"
+                                    class="text-center text-muted">
+                                    Seçilen gün için reçete bulunamadı.
                                 </td>
                             </tr>
                         }
                         else
                         {
-                            foreach (var recete in sonReceteler)
+                            foreach (var recete in gununReceteleri)
                             {
                                 <tr>
-                                    <td>@recete.KayitTarihi.ToString("dd.MM.yyyy HH:mm")</td>
-                                    <td>@recete.Muayene?.Hasta?.Ad @recete.Muayene?.Hasta?.Soyad</td>
-                                    <td>@recete.Muayene?.Doktor?.Ad @recete.Muayene?.Doktor?.Soyad</td>
+                                    <td>
+                                        @recete.KayitTarihi.ToString("HH:mm")
+                                    </td>
+
+                                    <td>
+                                        @recete.Muayene?.Hasta?.Ad
+                                        @recete.Muayene?.Hasta?.Soyad
+                                    </td>
+
+                                    <td>
+                                        @recete.Muayene?.Doktor?.Ad
+                                        @recete.Muayene?.Doktor?.Soyad
+                                    </td>
+
                                     <td>@recete.IlacAdi</td>
                                     <td>@recete.KullanimSekli</td>
                                 </tr>
@@ -449,14 +679,16 @@
     @if (canTahlil)
     {
         <div class="page-card mt-4">
-            <h5>@(doktorMu ? "Size Bağlı Son Tahliller" : "Son Tahliller")</h5>
+            <h5>
+                @ViewBag.SeciliTarihYazi Tarihli Tahliller
+            </h5>
             <hr />
 
             <div class="table-responsive">
                 <table class="table table-bordered table-hover align-middle">
                     <thead>
                         <tr>
-                            <th>İstenme Tarihi</th>
+                            <th>Saat</th>
                             <th>Hasta</th>
                             <th>Doktor</th>
                             <th>Tahlil</th>
@@ -465,22 +697,37 @@
                     </thead>
 
                     <tbody>
-                        @if (sonTahliller == null || sonTahliller.Count == 0)
+                        @if (
+                            gununTahlilleri == null ||
+                            gununTahlilleri.Count == 0
+                        )
                         {
                             <tr>
-                                <td colspan="5" class="text-center text-muted">
-                                    Tahlil bulunamadı.
+                                <td colspan="5"
+                                    class="text-center text-muted">
+                                    Seçilen gün için tahlil bulunamadı.
                                 </td>
                             </tr>
                         }
                         else
                         {
-                            foreach (var tahlil in sonTahliller)
+                            foreach (var tahlil in gununTahlilleri)
                             {
                                 <tr>
-                                    <td>@tahlil.IstenmeTarihi.ToString("dd.MM.yyyy HH:mm")</td>
-                                    <td>@tahlil.Muayene?.Hasta?.Ad @tahlil.Muayene?.Hasta?.Soyad</td>
-                                    <td>@tahlil.Muayene?.Doktor?.Ad @tahlil.Muayene?.Doktor?.Soyad</td>
+                                    <td>
+                                        @tahlil.IstenmeTarihi.ToString("HH:mm")
+                                    </td>
+
+                                    <td>
+                                        @tahlil.Muayene?.Hasta?.Ad
+                                        @tahlil.Muayene?.Hasta?.Soyad
+                                    </td>
+
+                                    <td>
+                                        @tahlil.Muayene?.Doktor?.Ad
+                                        @tahlil.Muayene?.Doktor?.Soyad
+                                    </td>
+
                                     <td>@tahlil.TahlilAdi</td>
                                     <td>@tahlil.Durum</td>
                                 </tr>

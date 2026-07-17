@@ -1,0 +1,121 @@
+﻿@model HBYS.Web.Models.Oda
+
+@{
+    ViewData["Title"] = "Oda Güncelle";
+}
+
+<div class="page-card">
+    <h3>Oda Güncelle</h3>
+
+    <p class="text-muted">
+        Seçili odanın servis, numara,
+        tip ve kullanım bilgilerini güncelle.
+    </p>
+
+    <form asp-controller="YatakYonetimi"
+          asp-action="EditOda"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+        <input type="hidden"
+               asp-for="OdaId" />
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-3">
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="ServisId"
+                       class="form-label">
+                    Servis
+                </label>
+
+                <select asp-for="ServisId"
+                        asp-items="ViewBag.Servisler"
+                        class="form-select">
+                </select>
+
+                <span asp-validation-for="ServisId"
+                      class="text-danger">
+                </span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="OdaNo"
+                       class="form-label">
+                    Oda Numarası
+                </label>
+
+                <input asp-for="OdaNo"
+                       class="form-control" />
+
+                <span asp-validation-for="OdaNo"
+                      class="text-danger">
+                </span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="OdaTipi"
+                       class="form-label">
+                    Oda Tipi
+                </label>
+
+                <select asp-for="OdaTipi"
+                        asp-items="ViewBag.OdaTipleri"
+                        class="form-select">
+                </select>
+
+                <span asp-validation-for="OdaTipi"
+                      class="text-danger">
+                </span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="CinsiyetKisitlamasi"
+                       class="form-label">
+                    Cinsiyet Kısıtlaması
+                </label>
+
+                <select asp-for="CinsiyetKisitlamasi"
+                        asp-items="ViewBag.CinsiyetKisitlamalari"
+                        class="form-select">
+                </select>
+
+                <span asp-validation-for="CinsiyetKisitlamasi"
+                      class="text-danger">
+                </span>
+            </div>
+
+            <div class="col-md-12">
+                <label asp-for="Aciklama"
+                       class="form-label">
+                    Açıklama
+                </label>
+
+                <textarea asp-for="Aciklama"
+                          class="form-control"
+                          rows="3">
+                </textarea>
+
+                <span asp-validation-for="Aciklama"
+                      class="text-danger">
+                </span>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit"
+                    class="btn btn-main">
+                Güncelle
+            </button>
+
+            <a asp-controller="YatakYonetimi"
+               asp-action="Index"
+               class="btn btn-secondary">
+                Geri Dön
+            </a>
+        </div>
+    </form>
+</div>

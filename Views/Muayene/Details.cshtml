@@ -1,35 +1,78 @@
 ﻿@model HBYS.Web.Models.Muayene
-
 @using HBYS.Web.Models
+@using Microsoft.AspNetCore.Http
 
 @{
     ViewData["Title"] = "Muayene Detay";
 
-    var receteler = ViewBag.Receteler as List<Recete>;
-    var tahliller = ViewBag.Tahliller as List<Tahlil>;
+    var receteler =
+        ViewBag.Receteler as List<Recete>;
+
+    var tahliller =
+        ViewBag.Tahliller as List<Tahlil>;
+
+    string? rolAdi =
+        Context.Session.GetString("RolAdi");
+
+    bool hizliIslemYetkisiVarMi =
+        rolAdi == "Admin" ||
+        rolAdi == "Doktor";
 }
+
 <div class="print-header">
     <h2>HBYS Web</h2>
     <h4>Muayene Bilgi Formu</h4>
-    <p>Yazdırma Tarihi: @DateTime.Now.ToString("dd.MM.yyyy HH:mm")</p>
+
+    <p>
+        Yazdırma Tarihi:
+        @DateTime.Now.ToString("dd.MM.yyyy HH:mm")
+    </p>
 </div>
+
 <div class="page-card">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
             <h3>Muayene Detay</h3>
-            <p class="text-muted mb-0">Muayeneye ait hasta, doktor, reçete ve tahlil bilgileri.</p>
+
+            <p class="text-muted mb-0">
+                Muayeneye ait hasta, doktor, reçete ve tahlil bilgileri.
+            </p>
         </div>
 
-        <div class="no-print">
-            <button type="button" onclick="window.print()" class="btn btn-main">
+        <div class="no-print d-flex flex-wrap gap-2">
+            @if (hizliIslemYetkisiVarMi)
+            {
+                <a asp-controller="Recete"
+                   asp-action="Create"
+                   asp-route-muayeneId="@Model.MuayeneId"
+                   class="btn btn-success">
+                    Yeni Reçete Ekle
+                </a>
+
+                <a asp-controller="Tahlil"
+                   asp-action="Create"
+                   asp-route-muayeneId="@Model.MuayeneId"
+                   class="btn btn-primary">
+                    Yeni Tahlil İste
+                </a>
+            }
+
+            <button type="button"
+                    onclick="window.print()"
+                    class="btn btn-main">
                 Yazdır
             </button>
 
-            <a asp-controller="Muayene" asp-action="Edit" asp-route-id="@Model.MuayeneId" class="btn btn-warning">
+            <a asp-controller="Muayene"
+               asp-action="Edit"
+               asp-route-id="@Model.MuayeneId"
+               class="btn btn-warning">
                 Güncelle
             </a>
 
-            <a asp-controller="Muayene" asp-action="Index" class="btn btn-secondary">
+            <a asp-controller="Muayene"
+               asp-action="Index"
+               class="btn btn-secondary">
                 Geri Dön
             </a>
         </div>
@@ -42,21 +85,40 @@
                     <h5>Muayene Bilgileri</h5>
                     <hr />
 
-                    <p><strong>Muayene Tarihi:</strong> @Model.MuayeneTarihi.ToString("dd.MM.yyyy HH:mm")</p>
+                    <p>
+                        <strong>Muayene Tarihi:</strong>
+                        @Model.MuayeneTarihi.ToString("dd.MM.yyyy HH:mm")
+                    </p>
+
                     <p>
                         <strong>Randevu:</strong>
+
                         @if (Model.Randevu != null)
                         {
                             @Model.Randevu.RandevuTarihiSaati.ToString("dd.MM.yyyy HH:mm")
                         }
                         else
                         {
-                            <span class="text-muted">Randevusuz</span>
+                            <span class="text-muted">
+                                Randevusuz
+                            </span>
                         }
                     </p>
-                    <p><strong>Şikayet:</strong> @Model.Sikayet</p>
-                    <p><strong>Tanı:</strong> @Model.Tani</p>
-                    <p><strong>Tedavi Notu:</strong> @Model.TedaviNotu</p>
+
+                    <p>
+                        <strong>Şikayet:</strong>
+                        @Model.Sikayet
+                    </p>
+
+                    <p>
+                        <strong>Tanı:</strong>
+                        @Model.Tani
+                    </p>
+
+                    <p>
+                        <strong>Tedavi Notu:</strong>
+                        @Model.TedaviNotu
+                    </p>
                 </div>
             </div>
         </div>
@@ -67,10 +129,26 @@
                     <h5>Hasta Bilgileri</h5>
                     <hr />
 
-                    <p><strong>Hasta:</strong> @Model.Hasta?.Ad @Model.Hasta?.Soyad</p>
-                    <p><strong>TC:</strong> @Model.Hasta?.TcKimlikNo</p>
-                    <p><strong>Telefon:</strong> @Model.Hasta?.Telefon</p>
-                    <p><strong>Kan Grubu:</strong> @Model.Hasta?.KanGrubu</p>
+                    <p>
+                        <strong>Hasta:</strong>
+                        @Model.Hasta?.Ad
+                        @Model.Hasta?.Soyad
+                    </p>
+
+                    <p>
+                        <strong>TC:</strong>
+                        @Model.Hasta?.TcKimlikNo
+                    </p>
+
+                    <p>
+                        <strong>Telefon:</strong>
+                        @Model.Hasta?.Telefon
+                    </p>
+
+                    <p>
+                        <strong>Kan Grubu:</strong>
+                        @Model.Hasta?.KanGrubu
+                    </p>
 
                     @if (Model.Hasta != null)
                     {
@@ -91,10 +169,27 @@
                     <h5>Doktor Bilgileri</h5>
                     <hr />
 
-                    <p><strong>Doktor:</strong> @Model.Doktor?.Unvan @Model.Doktor?.Ad @Model.Doktor?.Soyad</p>
-                    <p><strong>Sicil No:</strong> @Model.Doktor?.SicilNo</p>
-                    <p><strong>Telefon:</strong> @Model.Doktor?.Telefon</p>
-                    <p><strong>E-posta:</strong> @Model.Doktor?.Eposta</p>
+                    <p>
+                        <strong>Doktor:</strong>
+                        @Model.Doktor?.Unvan
+                        @Model.Doktor?.Ad
+                        @Model.Doktor?.Soyad
+                    </p>
+
+                    <p>
+                        <strong>TC Kimlik No:</strong>
+                        @Model.Doktor?.TcKimlikNo
+                    </p>
+
+                    <p>
+                        <strong>Telefon:</strong>
+                        @Model.Doktor?.Telefon
+                    </p>
+
+                    <p>
+                        <strong>E-posta:</strong>
+                        @Model.Doktor?.Eposta
+                    </p>
 
                     @if (Model.Doktor != null)
                     {
@@ -112,7 +207,22 @@
 </div>
 
 <div class="page-card mt-4">
-    <h5>Reçeteler</h5>
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0">
+            Reçeteler
+        </h5>
+
+        @if (hizliIslemYetkisiVarMi)
+        {
+            <a asp-controller="Recete"
+               asp-action="Create"
+               asp-route-muayeneId="@Model.MuayeneId"
+               class="btn btn-sm btn-success no-print">
+                Reçete Ekle
+            </a>
+        }
+    </div>
+
     <hr />
 
     <div class="table-responsive">
@@ -125,14 +235,23 @@
                     <th>Kullanım Şekli</th>
                     <th>Süre</th>
                     <th>Açıklama</th>
+
+                    <th class="no-print"
+                        style="width: 150px;">
+                        İşlemler
+                    </th>
                 </tr>
             </thead>
 
             <tbody>
-                @if (receteler == null || receteler.Count == 0)
+                @if (receteler == null ||
+                     receteler.Count == 0)
                 {
                     <tr>
-                        <td colspan="6" class="text-center text-muted">Reçete bulunamadı.</td>
+                        <td colspan="7"
+                            class="text-center text-muted">
+                            Reçete bulunamadı.
+                        </td>
                     </tr>
                 }
                 else
@@ -140,12 +259,48 @@
                     foreach (var recete in receteler)
                     {
                         <tr>
-                            <td>@recete.KayitTarihi.ToString("dd.MM.yyyy HH:mm")</td>
-                            <td>@recete.IlacAdi</td>
-                            <td>@recete.Doz</td>
-                            <td>@recete.KullanimSekli</td>
-                            <td>@recete.KullanimSuresi</td>
-                            <td>@recete.Aciklama</td>
+                            <td>
+                                @recete.KayitTarihi.ToString("dd.MM.yyyy HH:mm")
+                            </td>
+
+                            <td>
+                                @recete.IlacAdi
+                            </td>
+
+                            <td>
+                                @recete.Doz
+                            </td>
+
+                            <td>
+                                @recete.KullanimSekli
+                            </td>
+
+                            <td>
+                                @recete.KullanimSuresi
+                            </td>
+
+                            <td>
+                                @recete.Aciklama
+                            </td>
+
+                            <td class="no-print">
+                                <a asp-controller="Recete"
+                                   asp-action="Details"
+                                   asp-route-id="@recete.ReceteId"
+                                   class="btn btn-sm btn-info">
+                                    Detay
+                                </a>
+
+                                @if (hizliIslemYetkisiVarMi)
+                                {
+                                    <a asp-controller="Recete"
+                                       asp-action="Edit"
+                                       asp-route-id="@recete.ReceteId"
+                                       class="btn btn-sm btn-warning">
+                                        Düzenle
+                                    </a>
+                                }
+                            </td>
                         </tr>
                     }
                 }
@@ -155,7 +310,22 @@
 </div>
 
 <div class="page-card mt-4">
-    <h5>Tahliller</h5>
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0">
+            Tahliller
+        </h5>
+
+        @if (hizliIslemYetkisiVarMi)
+        {
+            <a asp-controller="Tahlil"
+               asp-action="Create"
+               asp-route-muayeneId="@Model.MuayeneId"
+               class="btn btn-sm btn-primary no-print">
+                Tahlil İste
+            </a>
+        }
+    </div>
+
     <hr />
 
     <div class="table-responsive">
@@ -167,14 +337,23 @@
                     <th>Durum</th>
                     <th>Sonuç Tarihi</th>
                     <th>Sonuç</th>
+
+                    <th class="no-print"
+                        style="width: 150px;">
+                        İşlemler
+                    </th>
                 </tr>
             </thead>
 
             <tbody>
-                @if (tahliller == null || tahliller.Count == 0)
+                @if (tahliller == null ||
+                     tahliller.Count == 0)
                 {
                     <tr>
-                        <td colspan="5" class="text-center text-muted">Tahlil bulunamadı.</td>
+                        <td colspan="6"
+                            class="text-center text-muted">
+                            Tahlil bulunamadı.
+                        </td>
                     </tr>
                 }
                 else
@@ -182,9 +361,18 @@
                     foreach (var tahlil in tahliller)
                     {
                         <tr>
-                            <td>@tahlil.IstenmeTarihi.ToString("dd.MM.yyyy HH:mm")</td>
-                            <td>@tahlil.TahlilAdi</td>
-                            <td>@tahlil.Durum</td>
+                            <td>
+                                @tahlil.IstenmeTarihi.ToString("dd.MM.yyyy HH:mm")
+                            </td>
+
+                            <td>
+                                @tahlil.TahlilAdi
+                            </td>
+
+                            <td>
+                                @tahlil.Durum
+                            </td>
+
                             <td>
                                 @if (tahlil.SonucTarihi != null)
                                 {
@@ -192,10 +380,34 @@
                                 }
                                 else
                                 {
-                                    <span class="text-muted">Yok</span>
+                                    <span class="text-muted">
+                                        Yok
+                                    </span>
                                 }
                             </td>
-                            <td>@tahlil.Sonuc</td>
+
+                            <td>
+                                @tahlil.Sonuc
+                            </td>
+
+                            <td class="no-print">
+                                <a asp-controller="Tahlil"
+                                   asp-action="Details"
+                                   asp-route-id="@tahlil.TahlilId"
+                                   class="btn btn-sm btn-info">
+                                    Detay
+                                </a>
+
+                                @if (hizliIslemYetkisiVarMi)
+                                {
+                                    <a asp-controller="Tahlil"
+                                       asp-action="Edit"
+                                       asp-route-id="@tahlil.TahlilId"
+                                       class="btn btn-sm btn-warning">
+                                        Düzenle
+                                    </a>
+                                }
+                            </td>
                         </tr>
                     }
                 }

@@ -7,74 +7,509 @@
 <div class="page-card">
     <div class="mb-3">
         <h3>Yeni Muayene Ekle</h3>
-        <p class="text-muted mb-0">Hasta muayene bilgilerini kaydet.</p>
+
+        <p class="text-muted mb-0">
+            Hastayı TC kimlik numarasıyla bul ve bugünkü
+            randevusuna bağlı muayene kaydını oluştur.
+        </p>
     </div>
 
-    <form asp-controller="Muayene" asp-action="Create" method="post">
+    <form asp-controller="Muayene"
+          asp-action="Create"
+          method="post">
+
         @Html.AntiForgeryToken()
 
-        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <input type="hidden"
+               asp-for="HastaId"
+               id="hastaIdInput" />
+
+        <input type="hidden"
+               asp-for="DoktorId"
+               id="doktorIdInput" />
+
+        <input type="hidden"
+               asp-for="RandevuId"
+               id="randevuIdInput" />
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-3">
+        </div>
 
         <div class="row g-3">
-            <div class="col-md-6">
-                <label asp-for="HastaId" class="form-label">Hasta</label>
-                <select asp-for="HastaId" asp-items="ViewBag.Hastalar" class="form-select">
-                    <option value="">Hasta seçiniz</option>
-                </select>
-                <span asp-validation-for="HastaId" class="text-danger"></span>
+            <div class="col-md-8">
+                <label for="tcKimlikNoInput"
+                       class="form-label">
+                    Hasta TC Kimlik No
+                </label>
+
+                <input type="text"
+                       id="tcKimlikNoInput"
+                       class="form-control only-digits"
+                       maxlength="11"
+                       inputmode="numeric"
+                       placeholder="11 haneli TC kimlik numarası" />
             </div>
 
-            <div class="col-md-6">
-                <label asp-for="DoktorId" class="form-label">Doktor</label>
-                <select asp-for="DoktorId" asp-items="ViewBag.Doktorlar" class="form-select">
-                    <option value="">Doktor seçiniz</option>
-                </select>
-                <span asp-validation-for="DoktorId" class="text-danger"></span>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="button"
+                        id="hastaBulButton"
+                        class="btn btn-main w-100">
+                    Hastayı ve Randevuyu Bul
+                </button>
             </div>
 
             <div class="col-md-12">
-                <label asp-for="RandevuId" class="form-label">Bağlı Randevu</label>
-                <select asp-for="RandevuId" asp-items="ViewBag.Randevular" class="form-select">
-                    <option value="">Randevusuz muayene</option>
+                <div id="aramaMesaji"
+                     class="alert d-none">
+                </div>
+            </div>
+
+            <div class="col-md-12">
+                <label for="randevuSelect"
+                       class="form-label">
+                    Hastanın Bugünkü Randevusu
+                </label>
+
+                <select id="randevuSelect"
+                        class="form-select"
+                        disabled>
+
+                    <option value="">
+                        Önce hasta TC kimlik numarasını giriniz
+                    </option>
                 </select>
-                <span asp-validation-for="RandevuId" class="text-danger"></span>
+
+                <span asp-validation-for="RandevuId"
+                      class="text-danger">
+                </span>
+
                 <small class="text-muted">
-                    Randevu seçersen hasta ve doktor bilgileri randevu ile uyumlu olmalıdır.
+                    Randevusu bulunmayan hasta için muayene
+                    oluşturulamaz.
                 </small>
             </div>
 
             <div class="col-md-6">
-                <label asp-for="MuayeneTarihi" class="form-label">Muayene Tarihi</label>
+                <label for="hastaBilgisiInput"
+                       class="form-label">
+                    Hasta
+                </label>
+
+                <input type="text"
+                       id="hastaBilgisiInput"
+                       class="form-control"
+                       readonly
+                       placeholder="Hasta bilgisi" />
+            </div>
+
+            <div class="col-md-6">
+                <label for="doktorBilgisiInput"
+                       class="form-label">
+                    Doktor
+                </label>
+
+                <input type="text"
+                       id="doktorBilgisiInput"
+                       class="form-control"
+                       readonly
+                       placeholder="Doktor randevudan otomatik gelir" />
+            </div>
+
+            <div class="col-md-6">
+                <label for="poliklinikBilgisiInput"
+                       class="form-label">
+                    Poliklinik
+                </label>
+
+                <input type="text"
+                       id="poliklinikBilgisiInput"
+                       class="form-control"
+                       readonly
+                       placeholder="Poliklinik bilgisi" />
+            </div>
+
+            <div class="col-md-6">
+                <label for="randevuBilgisiInput"
+                       class="form-label">
+                    Randevu Tarihi ve Saati
+                </label>
+
+                <input type="text"
+                       id="randevuBilgisiInput"
+                       class="form-control"
+                       readonly
+                       placeholder="Randevu tarihi ve saati" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="MuayeneTarihi"
+                       class="form-label">
+                    Muayene Tarihi
+                </label>
+
                 <input asp-for="MuayeneTarihi"
                        type="datetime-local"
                        step="60"
                        class="form-control"
+                       max="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")"
                        value="@Model.MuayeneTarihi.ToString("yyyy-MM-ddTHH:mm")" />
-                <span asp-validation-for="MuayeneTarihi" class="text-danger"></span>
+
+                <span asp-validation-for="MuayeneTarihi"
+                      class="text-danger">
+                </span>
             </div>
 
             <div class="col-md-12">
-                <label asp-for="Sikayet" class="form-label">Şikayet</label>
-                <textarea asp-for="Sikayet" class="form-control" rows="3" placeholder="Hastanın şikayetini yazınız..."></textarea>
-                <span asp-validation-for="Sikayet" class="text-danger"></span>
+                <label asp-for="Sikayet"
+                       class="form-label">
+                    Şikayet
+                </label>
+
+                <textarea asp-for="Sikayet"
+                          class="form-control"
+                          rows="3"
+                          placeholder="Hastanın şikayetini yazınız...">
+                </textarea>
+
+                <span asp-validation-for="Sikayet"
+                      class="text-danger">
+                </span>
             </div>
 
             <div class="col-md-12">
-                <label asp-for="Tani" class="form-label">Tanı</label>
-                <textarea asp-for="Tani" class="form-control" rows="3" placeholder="Doktor tanısını yazınız..."></textarea>
-                <span asp-validation-for="Tani" class="text-danger"></span>
+                <label asp-for="Tani"
+                       class="form-label">
+                    Tanı
+                </label>
+
+                <textarea asp-for="Tani"
+                          class="form-control"
+                          rows="3"
+                          placeholder="Doktor tanısını yazınız...">
+                </textarea>
+
+                <span asp-validation-for="Tani"
+                      class="text-danger">
+                </span>
             </div>
 
             <div class="col-md-12">
-                <label asp-for="TedaviNotu" class="form-label">Tedavi Notu</label>
-                <textarea asp-for="TedaviNotu" class="form-control" rows="4" placeholder="Tedavi açıklaması, öneriler ve notlar..."></textarea>
-                <span asp-validation-for="TedaviNotu" class="text-danger"></span>
+                <label asp-for="TedaviNotu"
+                       class="form-label">
+                    Tedavi Notu
+                </label>
+
+                <textarea asp-for="TedaviNotu"
+                          class="form-control"
+                          rows="4"
+                          placeholder="Tedavi açıklaması, öneriler ve notlar...">
+                </textarea>
+
+                <span asp-validation-for="TedaviNotu"
+                      class="text-danger">
+                </span>
             </div>
         </div>
 
         <div class="mt-4">
-            <button type="submit" class="btn btn-main">Kaydet</button>
-            <a asp-controller="Muayene" asp-action="Index" class="btn btn-secondary">Geri Dön</a>
+            <button type="submit"
+                    class="btn btn-main">
+                Kaydet
+            </button>
+
+            <a asp-controller="Muayene"
+               asp-action="Index"
+               class="btn btn-secondary">
+                Geri Dön
+            </a>
         </div>
     </form>
 </div>
+
+<script>
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+            const tcInput =
+                document.getElementById(
+                    "tcKimlikNoInput"
+                );
+
+            const hastaBulButton =
+                document.getElementById(
+                    "hastaBulButton"
+                );
+
+            const randevuSelect =
+                document.getElementById(
+                    "randevuSelect"
+                );
+
+            const hastaIdInput =
+                document.getElementById(
+                    "hastaIdInput"
+                );
+
+            const doktorIdInput =
+                document.getElementById(
+                    "doktorIdInput"
+                );
+
+            const randevuIdInput =
+                document.getElementById(
+                    "randevuIdInput"
+                );
+
+            const hastaBilgisiInput =
+                document.getElementById(
+                    "hastaBilgisiInput"
+                );
+
+            const doktorBilgisiInput =
+                document.getElementById(
+                    "doktorBilgisiInput"
+                );
+
+            const poliklinikBilgisiInput =
+                document.getElementById(
+                    "poliklinikBilgisiInput"
+                );
+
+            const randevuBilgisiInput =
+                document.getElementById(
+                    "randevuBilgisiInput"
+                );
+
+            const aramaMesaji =
+                document.getElementById(
+                    "aramaMesaji"
+                );
+
+            const randevuGetirUrl =
+                '@Url.Action(
+                                        "RandevulariGetir",
+                                        "Muayene"
+                                )';
+
+            let randevular = [];
+
+            function bilgileriTemizle() {
+                hastaIdInput.value = "";
+                doktorIdInput.value = "";
+                randevuIdInput.value = "";
+
+                hastaBilgisiInput.value = "";
+                doktorBilgisiInput.value = "";
+                poliklinikBilgisiInput.value = "";
+                randevuBilgisiInput.value = "";
+
+                randevuSelect.innerHTML = "";
+
+                randevuSelect.appendChild(
+                    new Option(
+                        "Uygun randevu bulunamadı",
+                        ""
+                    )
+                );
+
+                randevuSelect.disabled = true;
+
+                randevular = [];
+            }
+
+            function mesajGoster(
+                mesaj,
+                basarili
+            ) {
+                aramaMesaji.classList.remove(
+                    "d-none",
+                    "alert-success",
+                    "alert-danger"
+                );
+
+                aramaMesaji.classList.add(
+                    basarili
+                        ? "alert-success"
+                        : "alert-danger"
+                );
+
+                aramaMesaji.textContent =
+                    mesaj;
+            }
+
+            function randevuBilgisiniYerlestir(
+                randevu
+            ) {
+                if (!randevu) {
+                    doktorIdInput.value = "";
+                    randevuIdInput.value = "";
+
+                    doktorBilgisiInput.value = "";
+                    poliklinikBilgisiInput.value = "";
+                    randevuBilgisiInput.value = "";
+
+                    return;
+                }
+
+                hastaIdInput.value =
+                    randevu.hastaId;
+
+                doktorIdInput.value =
+                    randevu.doktorId;
+
+                randevuIdInput.value =
+                    randevu.randevuId;
+
+                doktorBilgisiInput.value =
+                    randevu.doktorAdi.trim();
+
+                poliklinikBilgisiInput.value =
+                    randevu.poliklinikAdi;
+
+                randevuBilgisiInput.value =
+                    randevu.tarihSaat;
+            }
+
+            function hastayiBul() {
+                const tcKimlikNo =
+                    tcInput.value.trim();
+
+                bilgileriTemizle();
+
+                if (tcKimlikNo.length !== 11) {
+                    mesajGoster(
+                        "TC kimlik numarası 11 haneli olmalıdır.",
+                        false
+                    );
+
+                    return;
+                }
+
+                hastaBulButton.disabled = true;
+                hastaBulButton.textContent =
+                    "Aranıyor...";
+
+                fetch(
+                    `${randevuGetirUrl}?tcKimlikNo=${encodeURIComponent(tcKimlikNo)}`
+                )
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(
+                                "Hasta bilgisi alınamadı."
+                            );
+                        }
+
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.hasta) {
+                            hastaIdInput.value =
+                                data.hasta.hastaId;
+
+                            hastaBilgisiInput.value =
+                                data.hasta.tcKimlikNo +
+                                " - " +
+                                data.hasta.adSoyad;
+                        }
+
+                        if (!data.basarili) {
+                            mesajGoster(
+                                data.mesaj,
+                                false
+                            );
+
+                            return;
+                        }
+
+                        randevular =
+                            data.randevular || [];
+
+                        randevuSelect.innerHTML = "";
+
+                        randevuSelect.appendChild(
+                            new Option(
+                                "Randevu seçiniz",
+                                ""
+                            )
+                        );
+
+                        randevular.forEach(
+                            function (randevu) {
+                                randevuSelect
+                                    .appendChild(
+                                        new Option(
+                                            randevu
+                                                .secenekMetni,
+                                            randevu
+                                                .randevuId
+                                        )
+                                    );
+                            }
+                        );
+
+                        randevuSelect.disabled =
+                            false;
+
+                        mesajGoster(
+                            "Hasta bulundu. Muayene yapılacak randevuyu seçiniz.",
+                            true
+                        );
+
+                        if (randevular.length === 1) {
+                            randevuSelect.value =
+                                randevular[0]
+                                    .randevuId;
+
+                            randevuBilgisiniYerlestir(
+                                randevular[0]
+                            );
+                        }
+                    })
+                    .catch(() => {
+                        mesajGoster(
+                            "Hasta ve randevu bilgileri alınırken hata oluştu.",
+                            false
+                        );
+                    })
+                    .finally(() => {
+                        hastaBulButton.disabled =
+                            false;
+
+                        hastaBulButton.textContent =
+                            "Hastayı ve Randevuyu Bul";
+                    });
+            }
+
+            hastaBulButton.addEventListener(
+                "click",
+                hastayiBul
+            );
+
+            tcInput.addEventListener(
+                "keydown",
+                function (event) {
+                    if (event.key === "Enter") {
+                        event.preventDefault();
+                        hastayiBul();
+                    }
+                }
+            );
+
+            randevuSelect.addEventListener(
+                "change",
+                function () {
+                    const seciliRandevu =
+                        randevular.find(r =>
+                            String(r.randevuId) ===
+                            String(this.value)
+                        );
+
+                    randevuBilgisiniYerlestir(
+                        seciliRandevu
+                    );
+                }
+            );
+        }
+    );
+</script>

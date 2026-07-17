@@ -1,9 +1,8 @@
 ﻿using HBYS.Web.Data;
+using HBYS.Web.Helpers;
 using HBYS.Web.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using HBYS.Web.Helpers;
 
 namespace HBYS.Web.Controllers
 {
@@ -18,123 +17,338 @@ namespace HBYS.Web.Controllers
 
         private bool GirisYapildiMi()
         {
-            string? kullaniciAdi = HttpContext.Session.GetString("KullaniciAdi");
+            string? kullaniciAdi =
+                HttpContext.Session.GetString("KullaniciAdi");
+
             return !string.IsNullOrEmpty(kullaniciAdi);
         }
 
         private bool MuayeneIslemiYetkisiVarMi()
         {
-            string? rolAdi = HttpContext.Session.GetString("RolAdi");
+            string? rolAdi =
+                HttpContext.Session.GetString("RolAdi");
 
             return rolAdi == "Admin" ||
                    rolAdi == "Doktor";
         }
 
-        private void SecimListeleriniHazirla()
+        private bool DoktorMu()
         {
-            ViewBag.Hastalar = new SelectList(
-                _context.Hastalar
-                    .Where(h => h.AktifMi)
-                    .OrderBy(h => h.Ad)
-                    .ThenBy(h => h.Soyad)
-                    .Select(h => new
-                    {
-                        h.HastaId,
-                        HastaBilgisi = h.TcKimlikNo + " - " + h.Ad + " " + h.Soyad
-                    })
-                    .ToList(),
-                "HastaId",
-                "HastaBilgisi"
-            );
+            return HttpContext.Session.GetString("RolAdi")
+                   == "Doktor";
+        }
 
-            ViewBag.Doktorlar = new SelectList(
-                _context.Doktorlar
-                    .Include(d => d.Poliklinik)
-                    .Where(d => d.AktifMi)
-                    .OrderBy(d => d.Ad)
-                    .ThenBy(d => d.Soyad)
-                    .Select(d => new
-                    {
-                        d.DoktorId,
-                        DoktorBilgisi = d.Ad + " " + d.Soyad + " - " + d.Poliklinik!.PoliklinikAdi
-                    })
-                    .ToList(),
-                "DoktorId",
-                "DoktorBilgisi"
-            );
+        private int? AktifDoktorId()
+        {
+            return HttpContext.Session.GetInt32("DoktorId");
+        }
 
-            var randevuListesi = _context.Randevular
-                .Include(r => r.Hasta)
-                .Include(r => r.Doktor)
-                .Where(r => r.AktifMi && r.Durum != "Iptal")
-                .OrderByDescending(r => r.RandevuTarihiSaati)
-                .ToList()
-                .Select(r => new
+        private IQueryable<Randevu> UygunRandevular()
+        {
+            DateTime bugun = DateTime.Today;
+            DateTime yarin = bugun.AddDays(1);
+
+            IQueryable<Randevu> sorgu =
+                _context.Randevular
+                    .Include(r => r.Hasta)
+                    .Include(r => r.Doktor)
+                    .Include(r => r.Poliklinik)
+                    .Where(r =>
+                        r.AktifMi &&
+                        r.Durum != "Iptal" &&
+                        r.Durum != "Tamamlandi" &&
+                        r.RandevuTarihiSaati >= bugun &&
+                        r.RandevuTarihiSaati < yarin &&
+                        !_context.Muayeneler.Any(m =>
+                            m.AktifMi &&
+                            m.RandevuId == r.RandevuId
+                        )
+                    );
+
+            if (DoktorMu())
+            {
+                int? doktorId = AktifDoktorId();
+
+                if (doktorId.HasValue)
                 {
-                    r.RandevuId,
-                    RandevuBilgisi =
-                        r.RandevuTarihiSaati.ToString("dd.MM.yyyy HH:mm") +
+                    sorgu = sorgu.Where(r =>
+                        r.DoktorId == doktorId.Value
+                    );
+                }
+                else
+                {
+                    sorgu = sorgu.Where(r => false);
+                }
+            }
+
+            return sorgu;
+        }
+
+        [HttpGet]
+        public IActionResult RandevulariGetir(
+            string tcKimlikNo
+        )
+        {
+            if (!GirisYapildiMi() ||
+                !MuayeneIslemiYetkisiVarMi())
+            {
+                return Json(new
+                {
+                    basarili = false,
+                    mesaj = "Bu işlem için yetkiniz yok."
+                });
+            }
+
+            tcKimlikNo =
+                tcKimlikNo?.Trim() ?? string.Empty;
+
+            if (!ValidationHelper.TcKimlikNoGecerliMi(
+                    tcKimlikNo))
+            {
+                return Json(new
+                {
+                    basarili = false,
+                    mesaj =
+                        "TC kimlik numarası 11 rakamdan oluşmalıdır."
+                });
+            }
+
+            Hasta? hasta =
+                _context.Hastalar.FirstOrDefault(h =>
+                    h.AktifMi &&
+                    h.TcKimlikNo == tcKimlikNo
+                );
+
+            if (hasta == null)
+            {
+                return Json(new
+                {
+                    basarili = false,
+                    mesaj =
+                        "Bu TC kimlik numarasına ait aktif hasta bulunamadı."
+                });
+            }
+
+            List<Randevu> randevular =
+                UygunRandevular()
+                    .Where(r =>
+                        r.HastaId == hasta.HastaId
+                    )
+                    .OrderBy(r =>
+                        r.RandevuTarihiSaati
+                    )
+                    .ToList();
+
+            if (randevular.Count == 0)
+            {
+                return Json(new
+                {
+                    basarili = false,
+
+                    hastaBulundu = true,
+
+                    hasta = new
+                    {
+                        hastaId = hasta.HastaId,
+
+                        adSoyad =
+                            hasta.Ad + " " +
+                            hasta.Soyad,
+
+                        tcKimlikNo =
+                            hasta.TcKimlikNo
+                    },
+
+                    mesaj =
+                        "Hastanın bugün için muayeneye uygun bekleyen randevusu bulunmuyor."
+                });
+            }
+
+            var randevuListesi =
+                randevular.Select(r => new
+                {
+                    randevuId =
+                        r.RandevuId,
+
+                    hastaId =
+                        r.HastaId,
+
+                    doktorId =
+                        r.DoktorId,
+
+                    doktorAdi =
+                        (r.Doktor?.Unvan ?? "") +
+                        " " +
+                        (r.Doktor?.Ad ?? "") +
+                        " " +
+                        (r.Doktor?.Soyad ?? ""),
+
+                    poliklinikAdi =
+                        r.Poliklinik?.PoliklinikAdi
+                        ?? "",
+
+                    tarihSaat =
+                        r.RandevuTarihiSaati
+                            .ToString(
+                                "dd.MM.yyyy HH:mm"
+                            ),
+
+                    secenekMetni =
+                        r.RandevuTarihiSaati
+                            .ToString("HH:mm") +
                         " - " +
-                        r.Hasta!.Ad + " " + r.Hasta.Soyad +
-                        " / Dr. " +
-                        r.Doktor!.Ad + " " + r.Doktor.Soyad +
-                        " / " +
-                        r.Durum
+                        (r.Doktor?.Unvan ?? "") +
+                        " " +
+                        (r.Doktor?.Ad ?? "") +
+                        " " +
+                        (r.Doktor?.Soyad ?? "") +
+                        " - " +
+                        (r.Poliklinik
+                            ?.PoliklinikAdi ?? "")
                 })
                 .ToList();
 
-            ViewBag.Randevular = new SelectList(
-                randevuListesi,
-                "RandevuId",
-                "RandevuBilgisi"
-            );
+            return Json(new
+            {
+                basarili = true,
+
+                hasta = new
+                {
+                    hastaId =
+                        hasta.HastaId,
+
+                    adSoyad =
+                        hasta.Ad + " " +
+                        hasta.Soyad,
+
+                    tcKimlikNo =
+                        hasta.TcKimlikNo
+                },
+
+                randevular =
+                    randevuListesi
+            });
         }
 
-        public IActionResult Index(string? arama, DateTime? baslangicTarihi, DateTime? bitisTarihi)
+        public IActionResult Index(
+            string? arama,
+            DateTime? baslangicTarihi,
+            DateTime? bitisTarihi
+        )
         {
             if (!GirisYapildiMi())
             {
-                return RedirectToAction("Login", "Account");
+                return RedirectToAction(
+                    "Login",
+                    "Account"
+                );
             }
 
-            var muayeneler = _context.Muayeneler
-                .Include(m => m.Hasta)
-                .Include(m => m.Doktor)
-                .Include(m => m.Randevu)
-                .Where(m => m.AktifMi)
-                .AsQueryable();
+            var muayeneler =
+                _context.Muayeneler
+                    .Include(m => m.Hasta)
+                    .Include(m => m.Doktor)
+                    .Include(m => m.Randevu)
+                    .Where(m => m.AktifMi)
+                    .AsQueryable();
+
+            if (DoktorMu())
+            {
+                int? doktorId =
+                    AktifDoktorId();
+
+                if (doktorId.HasValue)
+                {
+                    muayeneler =
+                        muayeneler.Where(m =>
+                            m.DoktorId ==
+                            doktorId.Value
+                        );
+                }
+                else
+                {
+                    muayeneler =
+                        muayeneler.Where(m => false);
+
+                    TempData["Hata"] =
+                        "Doktor kullanıcısı bir doktor kaydıyla eşleştirilmemiş.";
+                }
+            }
 
             if (!string.IsNullOrWhiteSpace(arama))
             {
-                muayeneler = muayeneler.Where(m =>
-                    m.Hasta!.TcKimlikNo.Contains(arama) ||
-                    m.Hasta.Ad.Contains(arama) ||
-                    m.Hasta.Soyad.Contains(arama) ||
-                    m.Doktor!.Ad.Contains(arama) ||
-                    m.Doktor.Soyad.Contains(arama) ||
-                    (m.Sikayet != null && m.Sikayet.Contains(arama)) ||
-                    (m.Tani != null && m.Tani.Contains(arama)));
+                muayeneler =
+                    muayeneler.Where(m =>
+                        m.Hasta!.TcKimlikNo
+                            .Contains(arama) ||
+
+                        m.Hasta.Ad
+                            .Contains(arama) ||
+
+                        m.Hasta.Soyad
+                            .Contains(arama) ||
+
+                        m.Doktor!.Ad
+                            .Contains(arama) ||
+
+                        m.Doktor.Soyad
+                            .Contains(arama) ||
+
+                        (
+                            m.Sikayet != null &&
+                            m.Sikayet.Contains(arama)
+                        ) ||
+
+                        (
+                            m.Tani != null &&
+                            m.Tani.Contains(arama)
+                        )
+                    );
             }
 
             if (baslangicTarihi.HasValue)
             {
-                DateTime baslangic = baslangicTarihi.Value.Date;
-                muayeneler = muayeneler.Where(m => m.MuayeneTarihi >= baslangic);
+                DateTime baslangic =
+                    baslangicTarihi.Value.Date;
+
+                muayeneler =
+                    muayeneler.Where(m =>
+                        m.MuayeneTarihi >=
+                        baslangic
+                    );
             }
 
             if (bitisTarihi.HasValue)
             {
-                DateTime bitis = bitisTarihi.Value.Date.AddDays(1);
-                muayeneler = muayeneler.Where(m => m.MuayeneTarihi < bitis);
+                DateTime bitis =
+                    bitisTarihi.Value
+                        .Date
+                        .AddDays(1);
+
+                muayeneler =
+                    muayeneler.Where(m =>
+                        m.MuayeneTarihi < bitis
+                    );
             }
 
-            ViewBag.Arama = arama;
-            ViewBag.BaslangicTarihi = baslangicTarihi?.ToString("yyyy-MM-dd");
-            ViewBag.BitisTarihi = bitisTarihi?.ToString("yyyy-MM-dd");
+            ViewBag.Arama =
+                arama;
 
-            return View(muayeneler
-                .OrderByDescending(m => m.MuayeneTarihi)
-                .ToList());
+            ViewBag.BaslangicTarihi =
+                baslangicTarihi?
+                    .ToString("yyyy-MM-dd");
+
+            ViewBag.BitisTarihi =
+                bitisTarihi?
+                    .ToString("yyyy-MM-dd");
+
+            return View(
+                muayeneler
+                    .OrderByDescending(m =>
+                        m.MuayeneTarihi
+                    )
+                    .ToList()
+            );
         }
 
         [HttpGet]
@@ -142,138 +356,207 @@ namespace HBYS.Web.Controllers
         {
             if (!GirisYapildiMi())
             {
-                return RedirectToAction("Login", "Account");
+                return RedirectToAction(
+                    "Login",
+                    "Account"
+                );
             }
 
             if (!MuayeneIslemiYetkisiVarMi())
             {
-                TempData["Hata"] = "Bu işlem için yetkiniz yok.";
+                TempData["Hata"] =
+                    "Bu işlem için yetkiniz yok.";
+
                 return RedirectToAction("Index");
             }
 
-            SecimListeleriniHazirla();
-
-            Muayene yeniMuayene = new Muayene
-            {
-                MuayeneTarihi = DateTime.Now
-            };
+            Muayene yeniMuayene =
+                new Muayene
+                {
+                    MuayeneTarihi =
+                        DateTime.Now
+                };
 
             return View(yeniMuayene);
         }
-        public IActionResult Details(int id)
-        {
-            if (!GirisYapildiMi())
-            {
-                return RedirectToAction("Login", "Account");
-            }
 
-            if (!MuayeneIslemiYetkisiVarMi())
-            {
-                TempData["Hata"] = "Bu sayfayı görüntüleme yetkiniz yok.";
-                return RedirectToAction("Index", "Dashboard");
-            }
-
-            var muayene = _context.Muayeneler
-                .Include(m => m.Hasta)
-                .Include(m => m.Doktor)
-                .Include(m => m.Randevu)
-                .FirstOrDefault(m => m.MuayeneId == id && m.AktifMi);
-
-            if (muayene == null)
-            {
-                TempData["Hata"] = "Muayene kaydı bulunamadı.";
-                return RedirectToAction("Index");
-            }
-
-            ViewBag.Receteler = _context.Receteler
-                .Where(r => r.MuayeneId == id && r.AktifMi)
-                .OrderByDescending(r => r.KayitTarihi)
-                .ToList();
-
-            ViewBag.Tahliller = _context.Tahliller
-                .Where(t => t.MuayeneId == id && t.AktifMi)
-                .OrderByDescending(t => t.IstenmeTarihi)
-                .ToList();
-
-            return View(muayene);
-        }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(Muayene muayene)
+        public IActionResult Create(
+            Muayene muayene
+        )
         {
             if (!GirisYapildiMi())
             {
-                return RedirectToAction("Login", "Account");
+                return RedirectToAction(
+                    "Login",
+                    "Account"
+                );
             }
 
             if (!MuayeneIslemiYetkisiVarMi())
             {
-                TempData["Hata"] = "Bu işlem için yetkiniz yok.";
+                TempData["Hata"] =
+                    "Bu işlem için yetkiniz yok.";
+
                 return RedirectToAction("Index");
-            }
-
-            if (muayene.HastaId <= 0)
-            {
-                ModelState.AddModelError("HastaId", "Hasta seçiniz.");
-            }
-
-            if (muayene.DoktorId <= 0)
-            {
-                ModelState.AddModelError("DoktorId", "Doktor seçiniz.");
             }
 
             Randevu? seciliRandevu = null;
 
-            if (muayene.RandevuId.HasValue)
+            if (!muayene.RandevuId.HasValue ||
+                muayene.RandevuId.Value <= 0)
             {
-                seciliRandevu = _context.Randevular.FirstOrDefault(r =>
-                    r.RandevuId == muayene.RandevuId.Value &&
-                    r.AktifMi);
+                ModelState.AddModelError(
+                    "RandevuId",
+                    "Muayene oluşturmak için hastanın geçerli bir randevusu seçilmelidir."
+                );
+            }
+            else
+            {
+                seciliRandevu =
+                    UygunRandevular()
+                        .FirstOrDefault(r =>
+                            r.RandevuId ==
+                            muayene.RandevuId.Value
+                        );
 
                 if (seciliRandevu == null)
                 {
-                    ModelState.AddModelError("RandevuId", "Seçilen randevu bulunamadı.");
+                    ModelState.AddModelError(
+                        "RandevuId",
+                        "Seçilen randevu geçersiz, iptal edilmiş, tamamlanmış veya bugüne ait değildir."
+                    );
                 }
                 else
                 {
-                    if (seciliRandevu.HastaId != muayene.HastaId)
-                    {
-                        ModelState.AddModelError("HastaId", "Seçilen hasta, randevudaki hasta ile uyuşmuyor.");
-                    }
+                    /*
+                        Hasta ve doktor bilgileri
+                        ekrandaki gizli alanlardan değil,
+                        doğrudan randevudan alınır.
+                    */
 
-                    if (seciliRandevu.DoktorId != muayene.DoktorId)
-                    {
-                        ModelState.AddModelError("DoktorId", "Seçilen doktor, randevudaki doktor ile uyuşmuyor.");
-                    }
+                    muayene.HastaId =
+                        seciliRandevu.HastaId;
+
+                    muayene.DoktorId =
+                        seciliRandevu.DoktorId;
                 }
+            }
+
+            if (muayene.MuayeneTarihi == default)
+            {
+                muayene.MuayeneTarihi =
+                    DateTime.Now;
+            }
+
+            if (muayene.MuayeneTarihi >
+                DateTime.Now)
+            {
+                ModelState.AddModelError(
+                    "MuayeneTarihi",
+                    "Muayene tarihi ileri bir tarih olamaz."
+                );
             }
 
             if (!ModelState.IsValid)
             {
-                SecimListeleriniHazirla();
                 return View(muayene);
             }
 
-            muayene.AktifMi = true;
+            muayene.MuayeneTarihi =
+                ValidationHelper
+                    .SaniyeVeSaliseyiTemizle(
+                        muayene.MuayeneTarihi
+                    );
 
-            if (muayene.MuayeneTarihi == DateTime.MinValue)
-            {
-                muayene.MuayeneTarihi = DateTime.Now;
-            }
-            muayene.MuayeneTarihi = ValidationHelper.SaniyeVeSaliseyiTemizle(muayene.MuayeneTarihi);
+            muayene.AktifMi = true;
 
             _context.Muayeneler.Add(muayene);
 
-            if (seciliRandevu != null)
-            {
-                seciliRandevu.Durum = "Tamamlandi";
-            }
+            seciliRandevu!.Durum =
+                "Tamamlandi";
 
             _context.SaveChanges();
 
-            TempData["Basari"] = "Muayene kaydı başarıyla oluşturuldu.";
+            TempData["Basari"] =
+                "Muayene kaydı başarıyla oluşturuldu.";
 
             return RedirectToAction("Index");
+        }
+
+        public IActionResult Details(int id)
+        {
+            if (!GirisYapildiMi())
+            {
+                return RedirectToAction(
+                    "Login",
+                    "Account"
+                );
+            }
+
+            if (!MuayeneIslemiYetkisiVarMi())
+            {
+                TempData["Hata"] =
+                    "Bu sayfayı görüntüleme yetkiniz yok.";
+
+                return RedirectToAction(
+                    "Index",
+                    "Dashboard"
+                );
+            }
+
+            Muayene? muayene =
+                _context.Muayeneler
+                    .Include(m => m.Hasta)
+                    .Include(m => m.Doktor)
+                    .Include(m => m.Randevu)
+                    .FirstOrDefault(m =>
+                        m.MuayeneId == id &&
+                        m.AktifMi
+                    );
+
+            if (muayene == null)
+            {
+                TempData["Hata"] =
+                    "Muayene kaydı bulunamadı.";
+
+                return RedirectToAction("Index");
+            }
+
+            if (DoktorMu() &&
+                AktifDoktorId() !=
+                muayene.DoktorId)
+            {
+                TempData["Hata"] =
+                    "Başka doktora ait muayeneyi görüntüleyemezsiniz.";
+
+                return RedirectToAction("Index");
+            }
+
+            ViewBag.Receteler =
+                _context.Receteler
+                    .Where(r =>
+                        r.MuayeneId == id &&
+                        r.AktifMi
+                    )
+                    .OrderByDescending(r =>
+                        r.KayitTarihi
+                    )
+                    .ToList();
+
+            ViewBag.Tahliller =
+                _context.Tahliller
+                    .Where(t =>
+                        t.MuayeneId == id &&
+                        t.AktifMi
+                    )
+                    .OrderByDescending(t =>
+                        t.IstenmeTarihi
+                    )
+                    .ToList();
+
+            return View(muayene);
         }
 
         [HttpGet]
@@ -281,104 +564,177 @@ namespace HBYS.Web.Controllers
         {
             if (!GirisYapildiMi())
             {
-                return RedirectToAction("Login", "Account");
+                return RedirectToAction(
+                    "Login",
+                    "Account"
+                );
             }
 
             if (!MuayeneIslemiYetkisiVarMi())
             {
-                TempData["Hata"] = "Bu işlem için yetkiniz yok.";
+                TempData["Hata"] =
+                    "Bu işlem için yetkiniz yok.";
+
                 return RedirectToAction("Index");
             }
 
-            var muayene = _context.Muayeneler
-                .FirstOrDefault(m => m.MuayeneId == id && m.AktifMi);
+            Muayene? muayene =
+                _context.Muayeneler
+                    .Include(m => m.Hasta)
+                    .Include(m => m.Doktor)
+                    .Include(m => m.Randevu)
+                    .FirstOrDefault(m =>
+                        m.MuayeneId == id &&
+                        m.AktifMi
+                    );
 
             if (muayene == null)
             {
-                TempData["Hata"] = "Muayene kaydı bulunamadı.";
+                TempData["Hata"] =
+                    "Muayene kaydı bulunamadı.";
+
                 return RedirectToAction("Index");
             }
 
-            SecimListeleriniHazirla();
+            if (DoktorMu() &&
+                AktifDoktorId() !=
+                muayene.DoktorId)
+            {
+                TempData["Hata"] =
+                    "Başka doktora ait muayeneyi düzenleyemezsiniz.";
+
+                return RedirectToAction("Index");
+            }
 
             return View(muayene);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Muayene muayene)
+        public IActionResult Edit(
+            Muayene muayene
+        )
         {
             if (!GirisYapildiMi())
             {
-                return RedirectToAction("Login", "Account");
+                return RedirectToAction(
+                    "Login",
+                    "Account"
+                );
             }
 
             if (!MuayeneIslemiYetkisiVarMi())
             {
-                TempData["Hata"] = "Bu işlem için yetkiniz yok.";
+                TempData["Hata"] =
+                    "Bu işlem için yetkiniz yok.";
+
                 return RedirectToAction("Index");
             }
 
-            if (muayene.HastaId <= 0)
+            Muayene? guncellenecekMuayene =
+                _context.Muayeneler
+                    .Include(m => m.Hasta)
+                    .Include(m => m.Doktor)
+                    .Include(m => m.Randevu)
+                    .FirstOrDefault(m =>
+                        m.MuayeneId ==
+                        muayene.MuayeneId &&
+
+                        m.AktifMi
+                    );
+
+            if (guncellenecekMuayene == null)
             {
-                ModelState.AddModelError("HastaId", "Hasta seçiniz.");
+                TempData["Hata"] =
+                    "Muayene kaydı bulunamadı.";
+
+                return RedirectToAction("Index");
             }
 
-            if (muayene.DoktorId <= 0)
+            if (DoktorMu() &&
+                AktifDoktorId() !=
+                guncellenecekMuayene.DoktorId)
             {
-                ModelState.AddModelError("DoktorId", "Doktor seçiniz.");
+                TempData["Hata"] =
+                    "Başka doktora ait muayeneyi düzenleyemezsiniz.";
+
+                return RedirectToAction("Index");
             }
 
-            if (muayene.RandevuId.HasValue)
+            if (!guncellenecekMuayene
+                    .RandevuId.HasValue)
             {
-                var seciliRandevu = _context.Randevular.FirstOrDefault(r =>
-                    r.RandevuId == muayene.RandevuId.Value &&
-                    r.AktifMi);
+                ModelState.AddModelError(
+                    "RandevuId",
+                    "Randevusuz muayene kaydı güncellenemez. Önce geçerli bir randevu oluşturulmalıdır."
+                );
+            }
 
-                if (seciliRandevu == null)
-                {
-                    ModelState.AddModelError("RandevuId", "Seçilen randevu bulunamadı.");
-                }
-                else
-                {
-                    if (seciliRandevu.HastaId != muayene.HastaId)
-                    {
-                        ModelState.AddModelError("HastaId", "Seçilen hasta, randevudaki hasta ile uyuşmuyor.");
-                    }
-
-                    if (seciliRandevu.DoktorId != muayene.DoktorId)
-                    {
-                        ModelState.AddModelError("DoktorId", "Seçilen doktor, randevudaki doktor ile uyuşmuyor.");
-                    }
-                }
+            if (muayene.MuayeneTarihi == default)
+            {
+                ModelState.AddModelError(
+                    "MuayeneTarihi",
+                    "Muayene tarihi boş bırakılamaz."
+                );
+            }
+            else if (
+                muayene.MuayeneTarihi >
+                DateTime.Now
+            )
+            {
+                ModelState.AddModelError(
+                    "MuayeneTarihi",
+                    "Muayene tarihi ileri bir tarih olamaz."
+                );
             }
 
             if (!ModelState.IsValid)
             {
-                SecimListeleriniHazirla();
+                muayene.Hasta =
+                    guncellenecekMuayene.Hasta;
+
+                muayene.Doktor =
+                    guncellenecekMuayene.Doktor;
+
+                muayene.Randevu =
+                    guncellenecekMuayene.Randevu;
+
+                muayene.HastaId =
+                    guncellenecekMuayene.HastaId;
+
+                muayene.DoktorId =
+                    guncellenecekMuayene.DoktorId;
+
+                muayene.RandevuId =
+                    guncellenecekMuayene.RandevuId;
+
                 return View(muayene);
             }
 
-            var guncellenecekMuayene = _context.Muayeneler
-                .FirstOrDefault(m => m.MuayeneId == muayene.MuayeneId && m.AktifMi);
+            /*
+                Hasta, doktor ve randevu
+                güncelleme sırasında değiştirilmez.
+            */
 
-            if (guncellenecekMuayene == null)
-            {
-                TempData["Hata"] = "Muayene kaydı bulunamadı.";
-                return RedirectToAction("Index");
-            }
+            guncellenecekMuayene.Sikayet =
+                muayene.Sikayet;
 
-            guncellenecekMuayene.HastaId = muayene.HastaId;
-            guncellenecekMuayene.DoktorId = muayene.DoktorId;
-            guncellenecekMuayene.RandevuId = muayene.RandevuId;
-            guncellenecekMuayene.Sikayet = muayene.Sikayet;
-            guncellenecekMuayene.Tani = muayene.Tani;
-            guncellenecekMuayene.TedaviNotu = muayene.TedaviNotu;
-            guncellenecekMuayene.MuayeneTarihi = ValidationHelper.SaniyeVeSaliseyiTemizle(muayene.MuayeneTarihi);
+            guncellenecekMuayene.Tani =
+                muayene.Tani;
+
+            guncellenecekMuayene.TedaviNotu =
+                muayene.TedaviNotu;
+
+            guncellenecekMuayene.MuayeneTarihi =
+                ValidationHelper
+                    .SaniyeVeSaliseyiTemizle(
+                        muayene.MuayeneTarihi
+                    );
 
             _context.SaveChanges();
 
-            TempData["Basari"] = "Muayene kaydı başarıyla güncellendi.";
+            TempData["Basari"] =
+                "Muayene kaydı başarıyla güncellendi.";
 
             return RedirectToAction("Index");
         }
@@ -389,31 +745,67 @@ namespace HBYS.Web.Controllers
         {
             if (!GirisYapildiMi())
             {
-                return RedirectToAction("Login", "Account");
+                return RedirectToAction(
+                    "Login",
+                    "Account"
+                );
             }
 
-            string? rolAdi = HttpContext.Session.GetString("RolAdi");
+            string? rolAdi =
+                HttpContext.Session.GetString("RolAdi");
 
-            if (rolAdi != "Admin" && rolAdi != "Doktor")
+            if (rolAdi != "Admin" &&
+                rolAdi != "Doktor")
             {
-                TempData["Hata"] = "Muayene silme işlemi için yetkiniz yok.";
+                TempData["Hata"] =
+                    "Muayene silme işlemi için yetkiniz yok.";
+
                 return RedirectToAction("Index");
             }
 
-            var muayene = _context.Muayeneler
-                .FirstOrDefault(m => m.MuayeneId == id && m.AktifMi);
+            Muayene? muayene =
+                _context.Muayeneler
+                    .Include(m => m.Randevu)
+                    .FirstOrDefault(m =>
+                        m.MuayeneId == id &&
+                        m.AktifMi
+                    );
 
             if (muayene == null)
             {
-                TempData["Hata"] = "Muayene kaydı bulunamadı.";
+                TempData["Hata"] =
+                    "Muayene kaydı bulunamadı.";
+
+                return RedirectToAction("Index");
+            }
+
+            if (DoktorMu() &&
+                AktifDoktorId() !=
+                muayene.DoktorId)
+            {
+                TempData["Hata"] =
+                    "Başka doktora ait muayeneyi silemezsiniz.";
+
                 return RedirectToAction("Index");
             }
 
             muayene.AktifMi = false;
 
+            /*
+                Muayene silinirse randevu tekrar
+                bekleyen duruma alınır.
+            */
+
+            if (muayene.Randevu != null)
+            {
+                muayene.Randevu.Durum =
+                    "Bekliyor";
+            }
+
             _context.SaveChanges();
 
-            TempData["Basari"] = "Muayene kaydı başarıyla silindi.";
+            TempData["Basari"] =
+                "Muayene kaydı başarıyla silindi.";
 
             return RedirectToAction("Index");
         }
